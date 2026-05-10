@@ -1,0 +1,99 @@
+@import './variables';
+@import 'vuetify/styles/main.sass';
+@import './override';
+@import './layout/container';
+@import './layout/sidebar';
+@import './layout/footer';
+@import './layout/topbar';
+@import './layout/horizontal';
+
+@import './components/VAlert';
+@import './components/VAvatar';
+@import './components/VList';
+@import './components/VButtons';
+@import './components/VCard';
+@import './components/VBadge';
+@import './components/VBreadcrumb';
+@import './components/VPagination';
+@import './components/VField';
+@import './components/VInput';
+@import './components/VNavigationDrawer';
+@import './components/VShadow';
+@import './components/VTextField';
+@import './components/VTextarea';
+@import './components/VTabs';
+@import './components/VTimeline';
+
+@import './pages/datatable';
+@import './pages/datatable2';
+@import './pages/dashboards';
+@import './pages/editor';
+@import './pages/authentication';
+
+@import 'vue3-perfect-scrollbar/style.css';
+
+@import './layout/dark';
+@import './customStyle.scss';
+
+// PWA Zoom Prevention
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  textarea,
+  select {
+    transform-origin: left top;
+    zoom: 1 !important;
+  }
+  
+  .v-field__input,
+  .v-text-field input,
+  .v-textarea textarea {
+    zoom: 1 !important;
+  }
+}
+
+// Prevent zoom on focus for PWA
+input:focus,
+textarea:focus,
+select:focus {
+  zoom: 1 !important;
+  transform: scale(1) !important;
+}
+
+// Vue Flow styles are imported in main.ts to ensure proper resolution
+
+:root {
+  --vf-node-bg: transparent;
+  --vf-node-text: inherit;
+  --vf-connection-path: rgb(var(--v-theme-secondary));
+  --vf-handle: rgba(85, 85, 85, 0.386);
+}
+.vue-flow {
+  min-height: 500px;
+  [dir='rtl'] & {
+    direction: ltr;
+  }
+}
+
+.swal2-container {
+    z-index: 99999 !important;
+  }
+.box-expand {
+box-shadow:
+  inset 0 4px 8px -8px rgba(50, 50, 50, 0.75),
+  inset 0 -4px 8px -8px rgba(50, 50, 50, 0.75);
+-webkit-box-shadow:
+  inset 0 4px 8px -8px rgba(50, 50, 50, 0.75),
+  inset 0 -4px 8px -8px rgba(50, 50, 50, 0.75);
+-moz-box-shadow:
+  inset 0 4px 8px -8px rgba(50, 50, 50, 0.75),
+  inset 0 -4px 8px -8px rgba(50, 50, 50, 0.75);
+}

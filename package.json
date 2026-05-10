@@ -1,0 +1,53 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "axios": "^1.8.2",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^1.2.0",
+        "tailwindcss": "^4.0.0",
+        "vite": "^6.2.4",
+        "vite-plugin-pwa": "^1.1.0"
+    },
+    "dependencies": {
+        "@fontsource/inter": "^5.2.5",
+        "@fontsource/poppins": "^5.2.6",
+        "@fontsource/public-sans": "^5.2.5",
+        "@fontsource/roboto": "^5.2.5",
+        "@mdi/js": "^7.4.47",
+        "@types/node": "^22.1.0",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "@vue-flow/controls": "^1.1.3",
+        "@vue-flow/core": "^1.47.0",
+        "@vue/tsconfig": "^0.5.1",
+        "apexcharts": "^4.7.0",
+        "flatpickr": "^4.6.13",
+        "laravel-echo": "^2.3.0",
+        "maska": "^3.1.1",
+        "moment": "^2.30.1",
+        "pinia": "^2.2.0",
+        "pusher-js": "^8.4.0",
+        "sass": "^1.77.8",
+        "sass-loader": "^16.0.0",
+        "typescript": "^5.5.4",
+        "vee-validate": "^4.13.2",
+        "vite-plugin-vuetify": "^2.0.4",
+        "vue": "^3.4.35",
+        "vue-i18n": "^9.14.5",
+        "vue-router": "^4.4.2",
+        "vue-sweetalert2": "^5.0.11",
+        "vue-tabler-icons": "^2.21.0",
+        "vue-tsc": "^2.0.29",
+        "vue3-apexcharts": "^1.8.0",
+        "vue3-easy-data-table": "^1.5.47",
+        "vue3-marquee": "^4.2.2",
+        "vue3-perfect-scrollbar": "^2.0.0",
+        "vue3-print-nb": "^0.1.4",
+        "vuetify": "^3.6.14"
+    }
+}

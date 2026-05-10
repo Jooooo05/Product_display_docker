@@ -1,0 +1,126 @@
+.requiredColor{
+    color: red
+}
+
+.v-navigation-drawer__content {
+    overflow-y: hidden;
+}
+
+@media only screen and (min-width: 1170px) {
+    .mini-sidebar {
+      .logo {
+        overflow: hidden;
+        img {
+          width: 52px;
+          height: 28px;
+        };
+        img.sapta{
+          width: 175px;
+          height: 45px;
+        };
+        img.acecom{
+          width: 172px;
+          height: 53px;
+        }
+      }
+    }
+  }
+
+
+.detailbtn {
+  height: 20px !important;
+  width: auto !important;
+  margin-top: -3px;
+}
+
+.preview-image {
+  width: 60px;
+  height: 60px;
+}
+.close-icon {
+  top: -10px;
+  right: -10px;
+  [dir='rtl'] & {
+    left: -10px;
+    right: unset;
+  }
+}
+.profile-box {
+  width: 118px;
+  height: 118px;
+  @media (max-width: 600px) {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.swal2-shown.swal2-height-auto {
+  padding-right: 0 !important;
+}
+
+.no-data{
+  margin-top: 100px !important;
+}
+  
+
+$field-padding: 13px;
+$chip-height: 24px;
+$input-margin: 3px;
+$row-gap: 20px;
+$chip-margin: 2px;
+
+.service-tag-input {
+  .v-field__input {
+    padding: {
+      top: $field-padding !important;
+      bottom: $field-padding !important;
+    }
+    row-gap: $row-gap !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+  }
+
+  .v-chip {
+    margin: $chip-margin !important;
+    height: $chip-height !important;
+  }
+
+  .v-field__input {
+    input {
+      margin-top: $input-margin !important;
+    }
+  }
+}
+
+.v-data-table__td.v-data-table-column--no-padding.v-data-table-column--align-start.v-data-table__td--expanded-row{
+  text-align: center !important;
+}
+
+.sticky-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sticky-footer-table .v-data-table__wrapper {
+  position: relative;
+  overflow: auto;
+}
+
+/* Sticky baris terakhir */
+.footer-row {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+.left-pagination .v-pagination__list {
+  justify-content: start;
+}
+@media (max-width: 1280px) {
+  .left-pagination .v-pagination__list {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,120 @@
+.v-table {
+  .v-table__wrapper > table {
+    thead > tr {
+      th {
+        background-color: rgb(var(--v-theme-containerBg)) !important;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: rgb(var(--v-theme-darkText));
+        padding: 10px 15px;
+        height: 50px;
+      }
+    }
+
+    tbody > tr {
+      height: 50px;
+
+      &:not(:last-child) {
+        > td, > th {
+          padding: 15px;
+        }
+      }
+
+      > td {
+        padding: 15px;
+      }
+    }
+
+    tfoot > tr {
+      height: 50px;
+      > td {
+        padding: 0px 10px;
+      }
+    }
+  }
+}
+
+.v-data-table-footer {
+  background-color: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-darkText));
+  font-size: 14px;
+  padding: 0px 10px;
+  height: 50px;
+  border-top: 1px solid rgb(var(--v-theme-borderLight));
+
+  @media (max-width: 800px) {
+    justify-content: center !important;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 50px;
+    padding: 8px 10px;
+
+    .v-data-table-footer__info {
+      order: 2;
+      width: 100%;
+      justify-content: center !important;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .v-data-table-footer__pagination {
+      order: 1;
+      width: 100%;
+      justify-content: center;
+
+      .v-btn {
+        min-width: 50px;
+        height: 40px;
+        margin: 0 4px;
+
+        &.v-btn--icon {
+          width: 40px;
+        }
+      }
+
+      .v-select {
+        max-width: 80px;
+        margin: 0 8px;
+
+        .v-field__input {
+          font-size: 14px;
+          padding: 8px;
+        }
+      }
+    }
+  }
+}
+
+.v-data-table-header {
+    &__content {
+      span {
+        padding-inline-end: 8px;
+      }
+    }
+  }
+
+.v-pagination {
+  width: 100%;
+
+  .v-pagination__list {
+    justify-content: center;
+    padding: 0;
+
+    @media (max-width: 600px) {
+      flex-wrap: wrap;
+
+      li {
+        margin: 2px;
+
+        .v-btn {
+           height: 32px;
+           width: 32px;
+           min-width: 32px;
+           font-size: 12px;
+           padding: 0;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Dashboard": "Dashboard",
+  "Default": "Default",
+  "Analytics": "Analytics",
+  "Widget": "Widget",
+  "Statistics": "Statistics",
+  "Data": "Data",
+  "Chart": "Chart",
+  "menu": {
+    "dashboard": "Dashboard",
+    "apps": "Apps",
+    "pages": "Pages",
+    "authentication": "Authentication",
+    "utility": "Utility",
+    "widgets": "Widgets",
+    "forms": "Forms",
+    "charts": "Charts",
+    "tables": "Tables",
+    "ui": "UI Elements",
+    "others": "Others",
+    "landing": "Landing",
+    "more": "More"
+  }
+}
