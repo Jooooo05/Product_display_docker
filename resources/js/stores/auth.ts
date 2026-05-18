@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', {
       this.initBroadcasting();
 
       // redirect to previous url or default to home page
-      router.push(this.returnUrl || '/');
+      router.push(this.returnUrl || '/dashboard');
     },
     async fetchProfile() {
       try {

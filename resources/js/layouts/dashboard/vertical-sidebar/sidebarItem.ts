@@ -19,11 +19,23 @@ const sidebarItem: menu[] = [
   {
     title: 'Home',
     icon: 'custom-home',
-    to: '/'
+    to: '/dashboard',
   },
+  { header: 'Product Display',
+    icon: 'custom-setting-2',
+  },
+  {
+    title: 'Product Management',
+    icon: 'custom-users',
+    to: '/product/list',
+    // permissions: [
+    //     'product-management.access'
+    // ]
+  },
+
   { header: 'Settings',
     icon: 'custom-setting-2',
-   },
+  },
   {
     title: 'User Management',
     icon: 'custom-users',

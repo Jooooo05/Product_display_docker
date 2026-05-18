@@ -9,12 +9,14 @@ const breadcrumbs = shallowRef([
   {
     title: 'Others',
     disabled: false,
-    href: '#'
+    href: '#',
+    description: ''
   },
   {
     title: 'Sample Page',
     disabled: true,
-    href: '#'
+    href: '#',
+    description: ''
   }
 ]);
 </script>

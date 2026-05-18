@@ -5,7 +5,6 @@ import UiParentCard from "@/components/shared/UiParentCard.vue";
 import HorizontalHeader from "@/layouts/dashboard/horizontal-header/HorizontalHeader.vue";
 import ProductListing from "@/components/display/ProductListing.vue"; // sesuaikan path-nya
 
-const page = ref({ title: "Product Listing" });
 </script>
 
 <template>

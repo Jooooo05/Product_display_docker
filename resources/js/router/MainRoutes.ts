@@ -1,5 +1,6 @@
 import UserRoute from "./ModulRoutes/user-route";
 import RoleRoute from "./ModulRoutes/role-route";
+import ProductRoute from "./ModulRoutes/product";
 
 const MainRoutes = {
   path: '/main',
@@ -15,7 +16,8 @@ const MainRoutes = {
       component: () => import('@/views/StarterPage.vue')
     },
     ...UserRoute,
-    ...RoleRoute
+    ...RoleRoute,
+    ...ProductRoute
   ]
 };
 
