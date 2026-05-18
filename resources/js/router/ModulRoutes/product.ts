@@ -7,6 +7,22 @@ const ProductRoute = [
             // permissions: ['role-management.access']
         }
     },
+    {
+        name: 'Product Create',
+        path: '/product/create',
+        component: () => import('@/views/pages/product-management/ProductForm.vue'),
+        meta: {
+            // permissions: ['role-management.access']
+        }
+    },
+    {
+        name: 'Product Edit',
+        path: '/product/:id/edit',
+        component: () => import('@/views/pages/product-management/ProductForm.vue'),
+        meta: {
+            // permissions: ['role-management.access']
+        }
+    }
 ];
 
 export default ProductRoute;

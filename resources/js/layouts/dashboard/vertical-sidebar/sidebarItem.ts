@@ -26,7 +26,7 @@ const sidebarItem: menu[] = [
   },
   {
     title: 'Product Management',
-    icon: 'custom-users',
+    icon: 'custom-shopping-cart',
     to: '/product/list',
     // permissions: [
     //     'product-management.access'

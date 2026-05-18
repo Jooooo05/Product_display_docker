@@ -25,7 +25,7 @@ const breadcrumbs = shallowRef([
                   color="primary"
                   variant="flat"
                   rounded="md"
-                  to="/ecommerce/product/create"
+                  to="/product/create"
               >
                   Create Product
               </v-btn>

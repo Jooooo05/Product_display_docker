@@ -1,0 +1,717 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+import BaseBreadcrumb from "@/components/shared/BaseBreadcrumb.vue";
+
+// ============================================================
+// PROPS
+// ============================================================
+const props = defineProps({
+    id: {
+        type: String,
+        default: null,
+    },
+});
+
+// ============================================================
+// ROUTER
+// ============================================================
+const router = useRouter();
+
+// ============================================================
+// STATE — Page & Breadcrumb
+// ============================================================
+const isEditMode = computed(() => !!props.id);
+
+const page = computed(() => ({
+    title: isEditMode.value ? "Edit Product" : "Create Product",
+}));
+
+const breadcrumbs = ref([
+    {
+        title: "Product Management",
+        disabled: false,
+        href: "/ecommerce/product",
+        description: "",
+    },
+]);
+
+// ============================================================
+// STATE — Options
+// ============================================================
+const categoryOptions = [
+    "Electronics",
+    "Fashion",
+    "Sports",
+    "Home & Living",
+    "Books",
+    "Toys",
+];
+const statusOptions = ["Active", "Inactive", "Draft"];
+
+// ============================================================
+// STATE — Form
+// ============================================================
+const productFormRef = ref(null);
+const formValid = ref(false);
+const isLoading = ref(false);
+
+const productForm = ref({
+    name: "",
+    description: "",
+    salePrice: null as number | null,
+    offerPrice: null as number | null,
+    stock: null as number | null,
+    sku: "",
+    categories: [] as string[],
+    status: "Active",
+    rating: 0,
+    tags: [] as string[],
+});
+
+// ============================================================
+// STATE — Image Upload
+// ============================================================
+const imageFile = ref<File | null>(null);
+const imagePreview = ref<string | null>(null);
+const isDragging = ref(false);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
+const triggerFileInput = () => fileInputRef.value?.click();
+
+const onFileSelected = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+        processFile(input.files[0]);
+    }
+};
+
+const onDrop = (event: DragEvent) => {
+    isDragging.value = false;
+    const file = event.dataTransfer?.files[0];
+    if (file && file.type.startsWith("image/")) {
+        processFile(file);
+    }
+};
+
+const processFile = (file: File) => {
+    imageFile.value = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imagePreview.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+};
+
+const removeImage = () => {
+    imageFile.value = null;
+    imagePreview.value = null;
+    if (fileInputRef.value) fileInputRef.value.value = "";
+};
+
+// ============================================================
+// STATE — Tags Input
+// ============================================================
+const tagInput = ref("");
+
+const addTag = () => {
+    const tag = tagInput.value.trim();
+    if (tag && !productForm.value.tags.includes(tag)) {
+        productForm.value.tags.push(tag);
+    }
+    tagInput.value = "";
+};
+
+const removeTag = (index: number) => {
+    productForm.value.tags.splice(index, 1);
+};
+
+const onTagKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === ",") {
+        event.preventDefault();
+        addTag();
+    }
+};
+
+// ============================================================
+// STATE — Currency Format
+// ============================================================
+const formatCurrency = (value: number | null) => {
+    if (!value && value !== 0) return "";
+    return new Intl.NumberFormat("id-ID").format(value);
+};
+
+const onPriceInput = (field: "salePrice" | "offerPrice", event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const raw = input.value.replace(/[^0-9]/g, "");
+    productForm.value[field] = raw === "" ? null : Number(raw);
+};
+
+// ============================================================
+// VALIDATION RULES
+// ============================================================
+const rules = {
+    required: (v: any) => !!v || "Field is required",
+    minLength: (min: number) => (v: string) =>
+        (v && v.length >= min) || `Minimum ${min} characters`,
+    maxLength: (max: number) => (v: string) =>
+        !v || v.length <= max || `Maximum ${max} characters`,
+    positive: (v: any) => !v || Number(v) > 0 || "Must be greater than 0",
+};
+
+// ============================================================
+// FUNCTIONS — Submit & Reset
+// ============================================================
+const submitForm = async () => {
+    const { valid } = await productFormRef.value.validate();
+    if (!valid) return;
+
+    isLoading.value = true;
+    try {
+        const payload = {
+            ...productForm.value,
+            image: imageFile.value,
+        };
+
+        if (isEditMode.value) {
+            // await ProductStore.updateProduct(props.id, payload);
+            console.log("Update payload:", payload);
+        } else {
+            // await ProductStore.addProduct(payload);
+            console.log("Create payload:", payload);
+            resetForm();
+        }
+
+        router.push("/ecommerce/product");
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const resetForm = () => {
+    productForm.value = {
+        name: "",
+        description: "",
+        salePrice: null,
+        offerPrice: null,
+        stock: null,
+        sku: "",
+        categories: [],
+        status: "Active",
+        rating: 0,
+        tags: [],
+    };
+    removeImage();
+};
+
+// ============================================================
+// LIFECYCLE
+// ============================================================
+onMounted(async () => {
+    if (!isEditMode.value) return;
+    // const detail = await ProductStore.getDetail(props.id);
+    // productForm.value = { ...detail };
+    // imagePreview.value = detail.image;
+});
+</script>
+
+<template>
+    <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs" />
+
+    <v-row>
+        <v-col cols="12">
+            <v-form ref="productFormRef" v-model="formValid">
+                <v-row>
+                    <!-- ─────────────────────────────────────────────── -->
+                    <!-- LEFT COLUMN                                      -->
+                    <!-- ─────────────────────────────────────────────── -->
+                    <v-col cols="12" lg="8">
+                        <!-- Card: Basic Info -->
+                        <v-card variant="outlined" rounded="lg" class="mb-4">
+                            <v-card-item class="px-6 py-4 bg-grey-lighten-5">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar
+                                        color="primary"
+                                        variant="tonal"
+                                        size="36"
+                                        rounded="md"
+                                    >
+                                        <SvgSprite name="custom-shopping-bag" style="width: 16px; height: 16px" />
+                                    </v-avatar>
+                                    <div>
+                                        <v-card-title
+                                            class="text-subtitle-1 font-weight-semibold pa-0"
+                                            >Product Information</v-card-title
+                                        >
+                                        <p
+                                            class="text-caption text-medium-emphasis mb-0"
+                                        >
+                                            Product name, description, and SKU
+                                        </p>
+                                    </div>
+                                </div>
+                            </v-card-item>
+                            <v-divider />
+                            <v-card-text class="pa-6">
+                                <!-- Product Name -->
+                                <v-label
+                                    class="text-caption font-weight-medium mb-1 d-block"
+                                >
+                                    Product Name
+                                    <span class="text-error">*</span>
+                                </v-label>
+                                <v-text-field
+                                    v-model="productForm.name"
+                                    placeholder="e.g., Apple MacBook Air M2"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    color="primary"
+                                    :rules="[
+                                        rules.required,
+                                        rules.minLength(3),
+                                        rules.maxLength(100),
+                                    ]"
+                                    counter="100"
+                                    class="mb-4"
+                                />
+
+                                <!-- Description -->
+                                <v-label
+                                    class="text-caption font-weight-medium mb-1 d-block"
+                                >
+                                    Description
+                                    <span class="text-error">*</span>
+                                </v-label>
+                                <v-textarea
+                                    v-model="productForm.description"
+                                    placeholder="Describe the product in detail…"
+                                    variant="outlined"
+                                    color="primary"
+                                    rows="4"
+                                    :rules="[
+                                        rules.required,
+                                        rules.minLength(10),
+                                    ]"
+                                    counter="500"
+                                    class="mb-4"
+                                />
+
+                                <!-- SKU -->
+                                <v-label
+                                    class="text-caption font-weight-medium mb-1 d-block"
+                                    >SKU</v-label
+                                >
+                                <v-text-field
+                                    v-model="productForm.sku"
+                                    placeholder="e.g., SKU-001-ABC"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    color="primary"
+                                    :rules="[rules.maxLength(50)]"
+                                    hint="Leave blank to auto-generate"
+                                    persistent-hint
+                                />
+                            </v-card-text>
+                        </v-card>
+
+                        <!-- Card: Pricing & Stock -->
+                        <v-card variant="outlined" rounded="lg" class="mb-4">
+                            <v-card-item class="px-6 py-4 bg-grey-lighten-5">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar
+                                        color="success"
+                                        variant="tonal"
+                                        size="36"
+                                        rounded="md"
+                                    >
+                                        <SvgSprite name="custom-dollar-square" style="width: 16px; height: 16px" />
+                                    </v-avatar>
+                                    <div>
+                                        <v-card-title
+                                            class="text-subtitle-1 font-weight-semibold pa-0"
+                                            >Pricing & Stock</v-card-title
+                                        >
+                                        <p
+                                            class="text-caption text-medium-emphasis mb-0"
+                                        >
+                                            Set prices and available stock
+                                        </p>
+                                    </div>
+                                </div>
+                            </v-card-item>
+                            <v-divider />
+                            <v-card-text class="pa-6">
+                                <v-row>
+                                    <!-- Sale Price -->
+                                    <v-col cols="12" sm="4">
+                                        <v-label
+                                            class="text-caption font-weight-medium mb-1 d-block"
+                                        >
+                                            Sale Price
+                                            <span class="text-error">*</span>
+                                        </v-label>
+                                        <v-text-field
+                                            :model-value="
+                                                formatCurrency(
+                                                    productForm.salePrice,
+                                                )
+                                            "
+                                            @input="
+                                                onPriceInput(
+                                                    'salePrice',
+                                                    $event,
+                                                )
+                                            "
+                                            placeholder="0"
+                                            variant="outlined"
+                                            density="comfortable"
+                                            color="primary"
+                                            prefix="$"
+                                            :rules="[rules.required]"
+                                        />
+                                    </v-col>
+
+                                    <!-- Offer / Original Price -->
+                                    <v-col cols="12" sm="4">
+                                        <v-label
+                                            class="text-caption font-weight-medium mb-1 d-block"
+                                            >Original Price</v-label
+                                        >
+                                        <v-text-field
+                                            :model-value="
+                                                formatCurrency(
+                                                    productForm.offerPrice,
+                                                )
+                                            "
+                                            @input="
+                                                onPriceInput(
+                                                    'offerPrice',
+                                                    $event,
+                                                )
+                                            "
+                                            placeholder="0"
+                                            variant="outlined"
+                                            density="comfortable"
+                                            color="primary"
+                                            prefix="$"
+                                            hint="Shown as strikethrough"
+                                            persistent-hint
+                                        />
+                                    </v-col>
+
+                                    <!-- Stock -->
+                                    <v-col cols="12" sm="4">
+                                        <v-label
+                                            class="text-caption font-weight-medium mb-1 d-block"
+                                        >
+                                            Stock
+                                            <span class="text-error">*</span>
+                                        </v-label>
+                                        <v-text-field
+                                            v-model.number="productForm.stock"
+                                            placeholder="0"
+                                            variant="outlined"
+                                            density="comfortable"
+                                            color="primary"
+                                            type="number"
+                                            min="0"
+                                            :rules="[rules.required]"
+                                        />
+                                    </v-col>
+                                </v-row>
+
+                                <!-- Discount badge preview -->
+                                <v-alert
+                                    v-if="
+                                        productForm.salePrice &&
+                                        productForm.offerPrice &&
+                                        productForm.offerPrice >
+                                            productForm.salePrice
+                                    "
+                                    type="success"
+                                    variant="tonal"
+                                    density="compact"
+                                    rounded="md"
+                                    icon="mdi-sale"
+                                    class="mt-2"
+                                >
+                                    Discount:
+                                    <strong>
+                                        {{
+                                            Math.round(
+                                                ((productForm.offerPrice -
+                                                    productForm.salePrice) /
+                                                    productForm.offerPrice) *
+                                                    100,
+                                            )
+                                        }}% off
+                                    </strong>
+                                    from original price
+                                </v-alert>
+                            </v-card-text>
+                        </v-card>
+
+
+                    </v-col>
+
+                    <!-- ─────────────────────────────────────────────── -->
+                    <!-- RIGHT COLUMN                                     -->
+                    <!-- ─────────────────────────────────────────────── -->
+                    <v-col cols="12" lg="4">
+                        <!-- Card: Product Image -->
+                        <v-card variant="outlined" rounded="lg" class="mb-4">
+                            <v-card-item class="px-6 py-4 bg-grey-lighten-5">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar
+                                        color="info"
+                                        variant="tonal"
+                                        size="36"
+                                        rounded="md"
+                                    >
+                                        <SvgSprite name="custom-image" style="width: 16px; height: 16px" />
+                                    </v-avatar>
+                                    <div>
+                                        <v-card-title
+                                            class="text-subtitle-1 font-weight-semibold pa-0"
+                                            >Product Image</v-card-title
+                                        >
+                                        <p
+                                            class="text-caption text-medium-emphasis mb-0"
+                                        >
+                                            JPG, PNG or WEBP. Max 2MB
+                                        </p>
+                                    </div>
+                                </div>
+                            </v-card-item>
+                            <v-divider />
+                            <v-card-text class="pa-6">
+                                <!-- Preview -->
+                                <div
+                                    v-if="imagePreview"
+                                    class="image-preview-wrapper mb-3"
+                                >
+                                    <v-img
+                                        :src="imagePreview"
+                                        aspect-ratio="1"
+                                        cover
+                                        rounded="lg"
+                                        class="border"
+                                    />
+                                    <v-btn
+                                        icon="mdi-close"
+                                        size="x-small"
+                                        color="error"
+                                        variant="flat"
+                                        class="remove-image-btn"
+                                        @click="removeImage"
+                                    />
+                                </div>
+
+                                <!-- Dropzone -->
+                                <div
+                                    v-else
+                                    class="dropzone"
+                                    :class="{ 'dropzone--active': isDragging }"
+                                    @click="triggerFileInput"
+                                    @dragover.prevent="isDragging = true"
+                                    @dragleave="isDragging = false"
+                                    @drop.prevent="onDrop"
+                                >
+                                    <v-icon
+                                        size="36"
+                                        color="grey-lighten-1"
+                                        class="mb-2"
+                                        >mdi-cloud-upload-outline</v-icon
+                                    >
+                                    <p
+                                        class="text-body-2 font-weight-medium mb-1"
+                                    >
+                                        Click or drag & drop
+                                    </p>
+                                    <p
+                                        class="text-caption text-medium-emphasis mb-0"
+                                    >
+                                        JPG, PNG, WEBP up to 2MB
+                                    </p>
+                                </div>
+
+                                <!-- Hidden file input -->
+                                <input
+                                    ref="fileInputRef"
+                                    type="file"
+                                    accept="image/*"
+                                    class="d-none"
+                                    @change="onFileSelected"
+                                />
+
+                                <!-- File name -->
+                                <p
+                                    v-if="imageFile"
+                                    class="text-caption text-medium-emphasis mt-2 mb-0"
+                                >
+                                    <v-icon size="14" class="me-1"
+                                        >mdi-paperclip</v-icon
+                                    >
+                                    {{ imageFile.name }}
+                                </p>
+                            </v-card-text>
+                        </v-card>
+
+                        <!-- Card: Classification -->
+                        <v-card variant="outlined" rounded="lg" class="mb-4">
+                            <v-card-item class="px-6 py-4 bg-grey-lighten-5">
+                                <div class="d-flex align-center ga-3">
+                                    <v-avatar
+                                        color="purple"
+                                        variant="tonal"
+                                        size="36"
+                                        rounded="md"
+                                    >
+                                        <SvgSprite name="custom-status-outline" style="width: 16px; height: 16px" />
+                                    </v-avatar>
+
+                                </div>
+                            </v-card-item>
+                            <v-divider />
+                            <v-card-text class="pa-6">
+                                <!-- Category -->
+                                <v-label
+                                    class="text-caption font-weight-medium mb-1 d-block"
+                                >
+                                    Category <span class="text-error">*</span>
+                                </v-label>
+                                <v-autocomplete
+                                    v-model="productForm.categories"
+                                    :items="categoryOptions"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    color="primary"
+                                    multiple
+                                    chips
+                                    closable-chips
+                                    hide-details
+                                    class="mb-4"
+                                    :rules="[rules.required]"
+                                >
+                                    <template v-slot:chip="{ props, item }">
+                                        <v-chip
+                                            v-bind="props"
+                                            color="primary"
+                                            variant="tonal"
+                                            size="small"
+                                        >
+                                            {{ item.title }}
+                                        </v-chip>
+                                    </template>
+                                </v-autocomplete>
+
+
+
+                                <!-- Status -->
+                                <v-label
+                                    class="text-caption font-weight-medium mb-1 d-block"
+                                    >Status</v-label
+                                >
+                                <v-select
+                                    v-model="productForm.status"
+                                    :items="statusOptions"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    color="primary"
+                                    hide-details
+                                >
+                                    <template #selection="{ item }">
+                                        <v-chip
+                                            :color="
+                                                item.value === 'Active'
+                                                    ? 'success'
+                                                    : item.value === 'Draft'
+                                                      ? 'warning'
+                                                      : 'error'
+                                            "
+                                            variant="tonal"
+                                            size="small"
+                                        >
+                                            {{ item.value }}
+                                        </v-chip>
+                                    </template>
+                                </v-select>
+                            </v-card-text>
+                        </v-card>
+
+                        <!-- Card: Actions -->
+                        <v-card variant="outlined" rounded="lg">
+                            <v-card-text class="pa-4">
+                                <v-btn
+                                    color="primary"
+                                    variant="flat"
+                                    rounded="md"
+                                    block
+                                    size="large"
+                                    :loading="isLoading"
+                                    @click="submitForm"
+                                    class="mb-2"
+                                >
+                                    <v-icon start>mdi-check</v-icon>
+                                    {{
+                                        isEditMode
+                                            ? "Update Product"
+                                            : "Create Product"
+                                    }}
+                                </v-btn>
+                                <v-btn
+                                    color="error"
+                                    variant="text"
+                                    rounded="md"
+                                    block
+                                    @click="router.push('/ecommerce/product')"
+                                >
+                                    Cancel
+                                </v-btn>
+                            </v-card-text>
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </v-form>
+        </v-col>
+    </v-row>
+</template>
+
+<style scoped>
+/* Dropzone */
+.dropzone {
+    border: 2px dashed rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        border-color 0.2s,
+        background 0.2s;
+    text-align: center;
+    background: #fafafa;
+}
+
+.dropzone:hover,
+.dropzone--active {
+    border-color: rgb(var(--v-theme-primary));
+    background: rgba(var(--v-theme-primary), 0.04);
+}
+
+/* Image preview */
+.image-preview-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+</style>
