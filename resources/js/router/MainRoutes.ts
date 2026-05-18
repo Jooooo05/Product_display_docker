@@ -6,12 +6,12 @@ const MainRoutes = {
   meta: {
     requiresAuth: true
   },
-  redirect: '/',
+  redirect: '/dashboard',
   component: () => import('@/layouts/dashboard/DashboardLayout.vue'),
   children: [
     {
       name: 'Starter',
-      path: '/',
+      path: '/dashboard',
       component: () => import('@/views/StarterPage.vue')
     },
     ...UserRoute,
