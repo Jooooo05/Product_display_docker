@@ -33,6 +33,12 @@ class RolePermissionSeeder extends Seeder
                 'edit',
                 'delete',
             ],
+            'product-management' => [
+                'access',
+                'create',
+                'edit',
+                'delete',
+            ],
             // Contoh module nested (parent + sub-module)
             // 'warehouse-management' => [
             //     'access',
@@ -105,6 +111,12 @@ class RolePermissionSeeder extends Seeder
         // 4. Setup Roles
         $adminRole = Role::firstOrCreate([
             'name' => 'Super Admin',
+            'guard_name' => $guardName,
+        ]);
+
+        // ↓ Tambahkan ini
+        $dealerRole = Role::firstOrCreate([
+            'name' => 'dealer',
             'guard_name' => $guardName,
         ]);
 

@@ -5,7 +5,8 @@ import ProductRoute from "./ModulRoutes/product";
 const MainRoutes = {
   path: '/main',
   meta: {
-    requiresAuth: true
+    requiresAuth: true,
+    requiresSuperAdmin: true,
   },
   redirect: '/dashboard',
   component: () => import('@/layouts/dashboard/DashboardLayout.vue'),

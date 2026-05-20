@@ -164,8 +164,8 @@ const rules = {
 // FUNCTIONS — Submit & Reset
 // ============================================================
 const submitForm = async () => {
-    const { valid } = await productFormRef.value.validate();
-    if (!valid) return;
+    // const { valid } = await productFormRef.value.validate();
+    // if (!valid) return;
 
     isLoading.value = true;
     try {

@@ -22,6 +22,8 @@ export const useAuthStore = defineStore('auth', {
       // Get User Profile
       const userProfile: any = await axios.get('/auth/me');
 
+      console.log('User profile fetched:', userProfile);
+
       const user = { ...userProfile, token };
 
       this.user = user;
@@ -35,9 +37,14 @@ export const useAuthStore = defineStore('auth', {
       // Initialize broadcasting
       this.initBroadcasting();
 
-      // redirect to previous url or default to home page
-      router.push(this.returnUrl || '/dashboard');
+      // Redirect berdasarkan role
+      if (user.role === 'Super Admin') {
+          router.push(this.returnUrl || '/dashboard');
+      } else {
+          router.push('/'); // dealer, customer, dll → ke halaman produk
+      }
     },
+
     async fetchProfile() {
       try {
         const userProfile: any = await axios.get('/auth/me');
@@ -63,6 +70,7 @@ export const useAuthStore = defineStore('auth', {
         console.error('Failed to refresh profile', error);
       }
     },
+
     async logout() {
       try {
         // Leave channels before logout
@@ -83,16 +91,15 @@ export const useAuthStore = defineStore('auth', {
         router.push('/auth/login');
       }
     },
+    
     initBroadcasting() {
-        if (!this.user || !window.Echo) return;
+      // Kalau Echo tidak aktif, skip
+      if (!this.user || !window.Echo) return;
 
-        // Listen to private user channel
-        window.Echo.private(`App.Models.User.${this.user.id}`)
-            .listen('.UserUpdated', (e: any) => {
-                console.log('UserUpdated event received:', e);
-                // Refresh profile to get new permissions/roles
-                this.fetchProfile();
-            });
+      window.Echo.private(`App.Models.User.${this.user.id}`)
+          .listen('.UserUpdated', (e: any) => {
+              this.fetchProfile();
+          });
     }
   }
 });

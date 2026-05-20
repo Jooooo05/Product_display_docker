@@ -4,7 +4,7 @@ const ProductRoute = [
         path: '/product/list',
         component: () => import('@/views/pages/product-management/ProductList.vue'),
         meta: {
-            // permissions: ['role-management.access']
+            permissions: ['product-management.access']
         }
     },
     {
@@ -12,7 +12,7 @@ const ProductRoute = [
         path: '/product/create',
         component: () => import('@/views/pages/product-management/ProductForm.vue'),
         meta: {
-            // permissions: ['role-management.access']
+            permissions: ['product-management.create']
         }
     },
     {
@@ -20,7 +20,7 @@ const ProductRoute = [
         path: '/product/:id/edit',
         component: () => import('@/views/pages/product-management/ProductForm.vue'),
         meta: {
-            // permissions: ['role-management.access']
+            permissions: ['product-management.edit']
         }
     }
 ];

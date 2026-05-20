@@ -27,7 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     // User Management
-    Route::apiResource('users', UserController::class);
+    Route::middleware('role:Super Admin')->group(function() {
+        Route::apiResource('users', UserController::class);
+    });
 
     // Role Management
     Route::get('/roles', [UserController::class, 'roles']);

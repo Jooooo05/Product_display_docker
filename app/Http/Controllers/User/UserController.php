@@ -23,7 +23,7 @@ class UserController extends Controller
         // Manual count based on string match since we are decoupling Spatie roles from users
         $data = $roles->map(function ($role) {
             $roleData = $role->toArray();
-            $roleData['users_count'] = User::where('role', $role->name)->count();
+            $roleData['users_count'] = User::query()->where('role', '=', $role->name)->count();
             return $roleData;
         });
 
@@ -214,6 +214,11 @@ class UserController extends Controller
         $user = DB::transaction(function () use ($data, $role, $permissions) {
             $user = User::create($data);
 
+            if (!empty($role)) {
+                $user->assignRole($role);
+            }
+
+
             if (!empty($permissions)) {
                 $user->syncPermissions($permissions);
             }
@@ -252,22 +257,8 @@ class UserController extends Controller
 
         $user->update($data);
 
-        if ($role) {
-            // We ensure no Spatie roles are attached (for existing users migrating to this logic)
-            // Logic copied from jinmu: we rely on permissions directly, or role string.
-            // But if we want Spatie roles to work for policies, we might want to sync role too?
-            // Jinmu explicitly does: $user->syncRoles([]);
-            // This means Jinmu uses "role" string for display/grouping, but "permissions" for actual Spatie access control?
-            // Or maybe permissions are synced from the role definition manually?
-            // Wait, in storeRole, it does $role->syncPermissions($request->permissions).
-            // But in store/update User, it does $user->syncPermissions($permissions).
-            // This implies custom permissions per user.
-            // If the user selects a "Role" in UI, does it copy permissions?
-            // The Frontend "UserForm" has "permissions" array.
-            // Typically, selecting a Role populates the permissions array in frontend or backend?
-            // In Jinmu controller, it doesn't seem to copy role permissions to user permissions automatically unless frontend sends them.
-            // Given "follow what is here", I will keep:
-            $user->syncRoles([]);
+        if (!empty($role)) {
+            $user->syncRoles([$role]); // ← ganti role lama dengan role baru
         }
 
         if ($request->has('permissions')) {

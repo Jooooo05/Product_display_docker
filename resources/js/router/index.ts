@@ -45,12 +45,21 @@ router.beforeEach(async (to, from, next) => {
   const access = useAccessStore();
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
+    
+    // Cek 1 — harus sudah login
     if (authRequired && !auth.user) {
       auth.returnUrl = to.fullPath;
       return next('/auth/login');
     }
 
-    // Check permissions
+    // Cek 2 - kalau route butuh Super Admin, cek rolenya
+    if(to.matched.some((record) => record.meta.requiresSuperAdmin)) {
+      if (auth.user?.role !== 'Super Admin') {
+        return next('/');
+      }
+    }
+
+    // Cek 3 - cek permissions seperti biasa
     if (to.meta.permissions) {
       const requiredPermissions = to.meta.permissions as string[];
       if (!access.hasAnyPermission(requiredPermissions)) {
