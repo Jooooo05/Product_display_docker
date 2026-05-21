@@ -214,6 +214,11 @@ class UserController extends Controller
         $user = DB::transaction(function () use ($data, $role, $permissions) {
             $user = User::create($data);
 
+            // [RBAC REFACTOR]
+            // We no longer use $user->assignRole($role) here.
+            // Spatie Roles are now decoupled from users to prevent permission inheritance.
+            // Roles only act as UI templates. Authorization relies 100% on Direct Permissions.
+
             if (!empty($permissions)) {
                 $user->syncPermissions($permissions);
             }
@@ -253,12 +258,17 @@ class UserController extends Controller
         $user->update($data);
 
         if ($role) {
+            // [RBAC REFACTOR]
             // Don't sync Spatie role to avoid inheriting permissions.
-            // We also ensure no Spatie roles are attached (for existing users migrating to this logic)
+            // We sync an empty array to ensure no Spatie roles are attached
+            // (useful for migrating existing users to this new logic).
             $user->syncRoles([]);
         }
 
-        // Always sync permissions, even if empty, to ensure removed permissions are actually removed
+        // [RBAC REFACTOR]
+        // Always sync permissions, even if the payload is empty.
+        // This ensures that if a user disables ALL permissions in the UI,
+        // the stale direct permissions in the database are actually removed.
         $user->syncPermissions($permissions);
 
         // Dispatch event for realtime frontend update

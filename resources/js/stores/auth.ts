@@ -32,6 +32,9 @@ export const useAuthStore = defineStore('auth', {
 
       // Update access store
       const accessStore = useAccessStore();
+      // [RBAC REFACTOR]
+      // The backend might return permissions as an array of objects (user.permissions)
+      // or an array of strings (user.permission_list). We handle both cases here.
       const perms = user.permission_list || (user.permissions ? user.permissions.map((p: any) => p.name) : []);
       accessStore.setAccess(user.role, perms);
 
@@ -57,6 +60,9 @@ export const useAuthStore = defineStore('auth', {
 
         // Update access store
         const accessStore = useAccessStore();
+        // [RBAC REFACTOR]
+        // The backend might return permissions as an array of objects (user.permissions)
+        // or an array of strings (user.permission_list). We handle both cases here.
         const perms = user.permission_list || (user.permissions ? user.permissions.map((p: any) => p.name) : []);
         accessStore.setAccess(user.role, perms);
 

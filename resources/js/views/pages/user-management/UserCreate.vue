@@ -265,10 +265,17 @@ export default {
       try {
         const permissions = [];
         this.permissionItems.forEach((item) => {
+          // [RBAC REFACTOR]
+          // Only add .access if the main module switch (item.access) is toggled ON.
+          // This prevents sending permissions if the user disabled the entire module.
           if (item.access && item.hasAccess) permissions.push(`${item.module}.access`);
+
           if (item.actions) {
             Object.keys(item.actions).forEach((actionKey) => {
-              if (item.actions[actionKey]?.value) {
+              // [RBAC REFACTOR]
+              // Only add action permissions if BOTH the main module switch AND the action switch are ON.
+              // This fixes the bug where hidden active actions were sent even when the module was disabled.
+              if (item.access && item.actions[actionKey]?.value) {
                 permissions.push(`${item.module}.${actionKey}`);
               }
             });
