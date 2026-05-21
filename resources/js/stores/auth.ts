@@ -5,66 +5,47 @@ import { useAccessStore } from './user-management/access-store';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    // initialize state from local storage to enable user to stay logged in
-    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-    // @ts-ignore
-    user: JSON.parse(localStorage.getItem('user')),
-    returnUrl: null
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    returnUrl: null as string | null,
   }),
   actions: {
     async login(username: string, password: string) {
       const res: any = await axios.post('/auth/login', { email: username, password });
 
-      // update pinia state
       const token = res.access_token;
-      this.user = { token }; // Set token immediately so axios interceptor can pick it up
+      this.user = { token };
 
-      // Get User Profile
       const userProfile: any = await axios.get('/auth/me');
-
-      console.log('User profile fetched:', userProfile);
-
       const user = { ...userProfile, token };
 
       this.user = user;
-      // store user details and jwt in local storage to keep user logged in between page refreshes
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Update access store
       const accessStore = useAccessStore();
-      // [RBAC REFACTOR]
-      // The backend might return permissions as an array of objects (user.permissions)
-      // or an array of strings (user.permission_list). We handle both cases here.
-      const perms = user.permission_list || (user.permissions ? user.permissions.map((p: any) => p.name) : []);
-      accessStore.setAccess(user.role, perms);
+      const perms: string[] = user.permission_list || [];
+      accessStore.setAccess(perms); // ✅ 1 param
 
-      // Initialize broadcasting
       this.initBroadcasting();
 
-      // Redirect berdasarkan role
-      if (user.role === 'Super Admin') {
-          router.push(this.returnUrl || '/dashboard');
+      if (perms.length > 0) {
+        router.push(this.returnUrl || '/dashboard');
       } else {
-          router.push('/'); // dealer, customer, dll → ke halaman produk
+        router.push('/');
       }
     },
 
     async fetchProfile() {
       try {
         const userProfile: any = await axios.get('/auth/me');
-        // Keep the token
         const token = this.user?.token;
         const user = { ...userProfile, token };
+
         this.user = user;
         localStorage.setItem('user', JSON.stringify(user));
 
-        // Update access store
         const accessStore = useAccessStore();
-        // [RBAC REFACTOR]
-        // The backend might return permissions as an array of objects (user.permissions)
-        // or an array of strings (user.permission_list). We handle both cases here.
-        const perms = user.permission_list || (user.permissions ? user.permissions.map((p: any) => p.name) : []);
-        accessStore.setAccess(user.role, perms);
+        const perms: string[] = user.permission_list || [];
+        accessStore.setAccess(perms); // ✅ 1 param
 
         // Re-check current route permission
         const currentRoute = router.currentRoute.value;
@@ -81,7 +62,6 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
-        // Leave channels before logout
         if (window.Echo) {
           window.Echo.leave(`App.Models.User.${this.user.id}`);
         }
@@ -92,22 +72,20 @@ export const useAuthStore = defineStore('auth', {
         this.user = null;
         localStorage.removeItem('user');
 
-        // Clear access store
         const accessStore = useAccessStore();
-        accessStore.setAccess('', []);
+        accessStore.setAccess([]); // ✅ 1 param, array kosong
 
         router.push('/auth/login');
       }
     },
 
     initBroadcasting() {
-      // Kalau Echo tidak aktif, skip
       if (!this.user || !window.Echo) return;
 
       window.Echo.private(`App.Models.User.${this.user.id}`)
-          .listen('.UserUpdated', (e: any) => {
-              this.fetchProfile();
-          });
+        .listen('.UserUpdated', () => {
+          this.fetchProfile();
+        });
     }
   }
 });

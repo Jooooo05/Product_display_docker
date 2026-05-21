@@ -4,29 +4,27 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            return response()->json([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'user' => $user
-            ]);
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Invalid login details'], 401);
         }
 
-        return response()->json(['message' => 'Invalid login details'], 401);
+        $user  = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type'   => 'Bearer',
+        ]);
     }
 
     public function me(Request $request)
@@ -41,15 +39,20 @@ class AuthController extends Controller
             'phone'           => $user->phone,
             'address'         => $user->address,
             'status'          => $user->status,
-            'role'            => $user->role,
             'is_dealer'       => $user->hasRole('dealer'),
-            'permission_list' => $user->permission_list,
+            // Tidak return 'role' string mentah
+            // Permission list otomatis kosong untuk dealer (tidak punya permission)
+            'permission_list' => $user->getPermissionNames(),
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         return response()->json(['message' => 'Logged out successfully']);
     }

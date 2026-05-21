@@ -28,9 +28,9 @@ const sidebarItem: menu[] = [
     title: 'Product Management',
     icon: 'custom-shopping-cart-bulk',
     to: '/product/list',
-    // permissions: [
-    //     'product-management.access'
-    // ]
+    permissions: [
+        'product-management.access'
+    ]
   },
 
   { header: 'Settings',

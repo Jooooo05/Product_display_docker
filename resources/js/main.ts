@@ -212,13 +212,12 @@ app.use(router);
 const authStore = useAuthStore(pinia);
 if (authStore.user) {
   const accessStore = useAccessStore(pinia);
-  accessStore.setAccess(authStore.user.role, authStore.user.permission_list || []);
+  // ✅ Ambil permission_list dari user yang tersimpan di localStorage
+  const perms: string[] = authStore.user.permission_list || [];
+  accessStore.setAccess(perms); // ✅ 1 param
 
-  // Initialize broadcasting for existing user
   authStore.initBroadcasting();
-
-  // Fetch fresh profile to update permissions
-  authStore.fetchProfile();
+  authStore.fetchProfile(); // Fetch fresh dari backend
 }
 
 app.use(VueSweetalert2);

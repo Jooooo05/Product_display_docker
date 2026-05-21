@@ -38,42 +38,36 @@ interface AuthStore {
 }
 
 router.beforeEach(async (to, from, next) => {
-  // redirect to login page if not logged in and trying to access a restricted page
-  const publicPages = ['/auth/login'];
-  const authRequired = !publicPages.includes(to.path);
-  const auth = useAuthStore();
-  const access = useAccessStore();
+    const publicPages = ['/auth/login'];
+    const authRequired = !publicPages.includes(to.path);
+    const auth = useAuthStore();
+    const access = useAccessStore();
 
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    
-    // Cek 1 — harus sudah login
-    if (authRequired && !auth.user) {
-      auth.returnUrl = to.fullPath;
-      return next('/auth/login');
-    }
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
 
-    // Cek 2 - kalau route butuh Super Admin, cek rolenya
-    if(to.matched.some((record) => record.meta.requiresSuperAdmin)) {
-      if (auth.user?.role !== 'Super Admin') {
-        return next('/');
-      }
-    }
+        // Cek 1 — harus sudah login
+        if (authRequired && !auth.user) {
+            auth.returnUrl = to.fullPath;
+            return next('/auth/login');
+        }
 
-    // Cek 3 - cek permissions seperti biasa
-    if (to.meta.permissions) {
-      const requiredPermissions = to.meta.permissions as string[];
-      if (!access.hasAnyPermission(requiredPermissions)) {
-        // Redirect to dashboard or error page if user lacks permission
-        return next('/pages/error');
-      }
+        // Cek 2 — hapus pengecekan role string, ganti ke permission
+        if (to.meta.permissions) {
+            const requiredPermissions = to.meta.permissions as string[];
+            if (!access.hasAnyPermission(requiredPermissions)) {
+                return next('/pages/error');
+            }
+        }
+
+        // Cek 3 — route khusus yang butuh permission tertentu
+        // Contoh di route definition:
+        // meta: { requiresAuth: true, permissions: ['user-management.access'] }
+        
+        return next();
     }
 
     next();
-  } else {
-    next();
-  }
 });
-
 router.beforeEach(() => {
   const uiStore = useUIStore();
   uiStore.isLoading = true;

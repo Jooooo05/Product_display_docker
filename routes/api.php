@@ -19,26 +19,46 @@ use App\Http\Controllers\User\UserController;
 Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
 
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     // User Management
-    Route::apiResource('users', UserController::class);
+    Route::middleware('can:user-management.access')->group(function () {
+        Route::apiResource('users', UserController::class)->except(['index']); // index sudah di-cover 'access'
+        Route::get('users', [UserController::class, 'index']);
+    });
+
+    Route::middleware('can:user-management.create')->group(function () {
+        Route::post('users', [UserController::class, 'store']);
+    });
+
+    Route::middleware('can:user-management.edit')->group(function () {
+        Route::put('users/{user}', [UserController::class, 'update']);
+    });
 
     // Role Management
-    Route::get('/roles', [UserController::class, 'roles']);
-    Route::post('/roles', [UserController::class, 'storeRole']);
-    Route::put('/roles/{id}', [UserController::class, 'updateRole']);
-    Route::delete('/roles/{id}', [UserController::class, 'destroyRole']);
+    Route::middleware('can:role-management.access')->group(function () {
+        Route::get('/roles', [UserController::class, 'roles']);
+    });
+
+    Route::middleware('can:role-management.create')->group(function () {
+        Route::post('/roles', [UserController::class, 'storeRole']);
+    });
+
+    Route::middleware('can:role-management.edit')->group(function () {
+        Route::put('/roles/{id}', [UserController::class, 'updateRole']);
+    });
+
+    Route::middleware('can:role-management.delete')->group(function () {
+        Route::delete('/roles/{id}', [UserController::class, 'destroyRole']);
+    });
 
     // Permission Management
-    Route::get('/permissions', [UserController::class, 'permissions']);
+    Route::middleware('can:role-management.access')->group(function () {
+        Route::get('/permissions', [UserController::class, 'permissions']);
+    });
 
-    // Stub for login activity logs
     Route::get('/login-activity-logs', function () {
         return [];
     });
