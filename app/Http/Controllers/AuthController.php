@@ -37,9 +37,13 @@ class AuthController extends Controller
             'id'              => $user->id,
             'name'            => $user->name,
             'email'           => $user->email,
-            'role'            => $user->role,              // dari string column 'role' di tabel users
-            'is_dealer'       => $user->hasRole('dealer'), // dari Spatie
-            'permission_list' => $user->permission_list,   // dari $appends di model
+            'nickname'        => $user->nickname,
+            'phone'           => $user->phone,
+            'address'         => $user->address,
+            'status'          => $user->status,
+            'role'            => $user->role,
+            'is_dealer'       => $user->hasRole('dealer'),
+            'permission_list' => $user->permission_list,
         ]);
     }
 

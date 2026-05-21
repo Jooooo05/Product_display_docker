@@ -43,9 +43,9 @@ export default {
       selectAll: false,
       loading: false,
       valid: false,
-    scrollbarOptions: {
-        suppressScrollX: true,
-      },
+      scrollbarOptions: {
+          suppressScrollX: true,
+        },
       rules: {
         required: value => !!value || 'Field is required',
         email: value => {

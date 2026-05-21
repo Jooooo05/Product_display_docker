@@ -266,7 +266,7 @@ class UserController extends Controller
         }
 
         // Dispatch event for realtime frontend update
-        UserUpdated::dispatch($user);
+        // UserUpdated::dispatch($user);
 
         return response()->json([
             'success' => true,
