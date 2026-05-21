@@ -32,7 +32,8 @@ export const useAuthStore = defineStore('auth', {
 
       // Update access store
       const accessStore = useAccessStore();
-      accessStore.setAccess(user.role, user.permission_list || []);
+      const perms = user.permission_list || (user.permissions ? user.permissions.map((p: any) => p.name) : []);
+      accessStore.setAccess(user.role, perms);
 
       // Initialize broadcasting
       this.initBroadcasting();
@@ -56,7 +57,8 @@ export const useAuthStore = defineStore('auth', {
 
         // Update access store
         const accessStore = useAccessStore();
-        accessStore.setAccess(user.role, user.permission_list || []);
+        const perms = user.permission_list || (user.permissions ? user.permissions.map((p: any) => p.name) : []);
+        accessStore.setAccess(user.role, perms);
 
         // Re-check current route permission
         const currentRoute = router.currentRoute.value;
@@ -91,7 +93,7 @@ export const useAuthStore = defineStore('auth', {
         router.push('/auth/login');
       }
     },
-    
+
     initBroadcasting() {
       // Kalau Echo tidak aktif, skip
       if (!this.user || !window.Echo) return;

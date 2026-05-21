@@ -214,11 +214,6 @@ class UserController extends Controller
         $user = DB::transaction(function () use ($data, $role, $permissions) {
             $user = User::create($data);
 
-            if (!empty($role)) {
-                $user->assignRole($role);
-            }
-
-
             if (!empty($permissions)) {
                 $user->syncPermissions($permissions);
             }
@@ -257,13 +252,14 @@ class UserController extends Controller
 
         $user->update($data);
 
-        if (!empty($role)) {
-            $user->syncRoles([$role]); // ← ganti role lama dengan role baru
+        if ($role) {
+            // Don't sync Spatie role to avoid inheriting permissions.
+            // We also ensure no Spatie roles are attached (for existing users migrating to this logic)
+            $user->syncRoles([]);
         }
 
-        if ($request->has('permissions')) {
-            $user->syncPermissions($permissions);
-        }
+        // Always sync permissions, even if empty, to ensure removed permissions are actually removed
+        $user->syncPermissions($permissions);
 
         // Dispatch event for realtime frontend update
         // UserUpdated::dispatch($user);
