@@ -50,6 +50,12 @@ const categoryOptions = [
 ];
 const statusOptions = ["Active", "Inactive", "Draft"];
 
+const stockStatusOptions = [
+    { title: 'Available', value: 'available' },
+    { title: 'Low stock', value: 'low_stock' },
+    { title: 'Out of stock', value: 'out_of_stock' },
+];
+
 // ============================================================
 // STATE — Form
 // ============================================================
@@ -60,9 +66,9 @@ const isLoading = ref(false);
 const productForm = ref({
     name: "",
     description: "",
-    salePrice: null as number | null,
-    offerPrice: null as number | null,
-    stock: null as number | null,
+    originalPrice: null as number | null,
+    dealerPrice: null as number | null,
+    stockStatus: 'available' as 'available' | 'low_stock' | 'out_of_stock',
     sku: "",
     categories: [] as string[],
     status: "Active",
@@ -142,7 +148,7 @@ const formatCurrency = (value: number | null) => {
     return new Intl.NumberFormat("id-ID").format(value);
 };
 
-const onPriceInput = (field: "salePrice" | "offerPrice", event: Event) => {
+const onPriceInput = (field: "originalPrice" | "dealerPrice", event: Event) => {
     const input = event.target as HTMLInputElement;
     const raw = input.value.replace(/[^0-9]/g, "");
     productForm.value[field] = raw === "" ? null : Number(raw);
@@ -193,9 +199,9 @@ const resetForm = () => {
     productForm.value = {
         name: "",
         description: "",
-        salePrice: null,
-        offerPrice: null,
-        stock: null,
+        originalPrice: null,
+        dealerPrice: null,
+        stockStatus: 'available',
         sku: "",
         categories: [],
         status: "Active",
@@ -226,7 +232,7 @@ onMounted(async () => {
                     <!-- ─────────────────────────────────────────────── -->
                     <!-- LEFT COLUMN                                      -->
                     <!-- ─────────────────────────────────────────────── -->
-                    <v-col cols="12" lg="8">
+                    <v-col cols="12" lg="8" class="d-flex flex-column">
                         <!-- Card: Basic Info -->
                         <v-card variant="outlined" rounded="lg" class="mb-4">
                             <v-card-item class="px-6 py-4 bg-grey-lighten-5">
@@ -330,12 +336,12 @@ onMounted(async () => {
                                     <div>
                                         <v-card-title
                                             class="text-subtitle-1 font-weight-semibold pa-0"
-                                            >Pricing & Stock</v-card-title
+                                            >Pricing Product</v-card-title
                                         >
                                         <p
                                             class="text-caption text-medium-emphasis mb-0"
                                         >
-                                            Set prices and available stock
+                                            Set prices for customer
                                         </p>
                                     </div>
                                 </div>
@@ -344,22 +350,22 @@ onMounted(async () => {
                             <v-card-text class="pa-6">
                                 <v-row>
                                     <!-- Sale Price -->
-                                    <v-col cols="12" sm="4">
+                                    <v-col cols="12" sm="6">
                                         <v-label
                                             class="text-caption font-weight-medium mb-1 d-block"
                                         >
-                                            Sale Price
+                                            Original Price
                                             <span class="text-error">*</span>
                                         </v-label>
                                         <v-text-field
                                             :model-value="
                                                 formatCurrency(
-                                                    productForm.salePrice,
+                                                    productForm.originalPrice,
                                                 )
                                             "
                                             @input="
                                                 onPriceInput(
-                                                    'salePrice',
+                                                    'originalPrice',
                                                     $event,
                                                 )
                                             "
@@ -372,21 +378,21 @@ onMounted(async () => {
                                         />
                                     </v-col>
 
-                                    <!-- Offer / Original Price -->
-                                    <v-col cols="12" sm="4">
+                                    <!-- Dealer Price -->
+                                    <v-col cols="12" sm="6">
                                         <v-label
                                             class="text-caption font-weight-medium mb-1 d-block"
-                                            >Original Price</v-label
+                                            >Dealer Price</v-label
                                         >
                                         <v-text-field
                                             :model-value="
                                                 formatCurrency(
-                                                    productForm.offerPrice,
+                                                    productForm.dealerPrice,
                                                 )
                                             "
                                             @input="
                                                 onPriceInput(
-                                                    'offerPrice',
+                                                    'dealerPrice',
                                                     $event,
                                                 )
                                             "
@@ -400,34 +406,13 @@ onMounted(async () => {
                                         />
                                     </v-col>
 
-                                    <!-- Stock -->
-                                    <v-col cols="12" sm="4">
-                                        <v-label
-                                            class="text-caption font-weight-medium mb-1 d-block"
-                                        >
-                                            Stock
-                                            <span class="text-error">*</span>
-                                        </v-label>
-                                        <v-text-field
-                                            v-model.number="productForm.stock"
-                                            placeholder="0"
-                                            variant="outlined"
-                                            density="comfortable"
-                                            color="primary"
-                                            type="number"
-                                            min="0"
-                                            :rules="[rules.required]"
-                                        />
-                                    </v-col>
+
                                 </v-row>
 
                                 <!-- Discount badge preview -->
                                 <v-alert
                                     v-if="
-                                        productForm.salePrice &&
-                                        productForm.offerPrice &&
-                                        productForm.offerPrice >
-                                            productForm.salePrice
+                                        productForm.originalPrice && productForm.dealerPrice && productForm.originalPrice > productForm.dealerPrice
                                     "
                                     type="success"
                                     variant="tonal"
@@ -440,10 +425,7 @@ onMounted(async () => {
                                     <strong>
                                         {{
                                             Math.round(
-                                                ((productForm.offerPrice -
-                                                    productForm.salePrice) /
-                                                    productForm.offerPrice) *
-                                                    100,
+                                                ((productForm.originalPrice - productForm.dealerPrice) / productForm.originalPrice) * 100,
                                             )
                                         }}% off
                                     </strong>
@@ -458,9 +440,9 @@ onMounted(async () => {
                     <!-- ─────────────────────────────────────────────── -->
                     <!-- RIGHT COLUMN                                     -->
                     <!-- ─────────────────────────────────────────────── -->
-                    <v-col cols="12" lg="4">
+                    <v-col cols="12" lg="4" class="d-flex flex-column">
                         <!-- Card: Product Image -->
-                        <v-card variant="outlined" rounded="lg" class="mb-4">
+                        <v-card variant="outlined" rounded="lg" class="mb-3">
                             <v-card-item class="px-6 py-4 bg-grey-lighten-5">
                                 <div class="d-flex align-center ga-3">
                                     <v-avatar
@@ -497,6 +479,7 @@ onMounted(async () => {
                                         cover
                                         rounded="lg"
                                         class="border"
+                                        max-height="170"
                                     />
                                     <v-btn
                                         icon="mdi-close"
@@ -559,7 +542,7 @@ onMounted(async () => {
                         </v-card>
 
                         <!-- Card: Classification -->
-                        <v-card variant="outlined" rounded="lg" class="mb-4">
+                        <v-card variant="outlined" rounded="lg" class="mb-2" style="flex: 1">
                             <v-card-item class="px-6 py-4 bg-grey-lighten-5">
                                 <div class="d-flex align-center ga-3">
                                     <v-avatar
@@ -570,7 +553,12 @@ onMounted(async () => {
                                     >
                                         <SvgSprite name="custom-status-outline" style="width: 16px; height: 16px" />
                                     </v-avatar>
-
+                                    <div>
+                                        <v-card-title class="text-subtitle-1 font-weight-semibold pa-0">Product Classification</v-card-title>
+                                        <p class="text-caption text-medium-emphasis mb-0">
+                                            Internal classification only
+                                        </p>
+                                    </div>
                                 </div>
                             </v-card-item>
                             <v-divider />
@@ -627,8 +615,8 @@ onMounted(async () => {
                                                 item.value === 'Active'
                                                     ? 'success'
                                                     : item.value === 'Draft'
-                                                      ? 'warning'
-                                                      : 'error'
+                                                    ? 'warning'
+                                                    : 'error'
                                             "
                                             variant="tonal"
                                             size="small"
@@ -637,35 +625,67 @@ onMounted(async () => {
                                         </v-chip>
                                     </template>
                                 </v-select>
+
+                                <!-- Stock Availability — Internal Label -->
+                                <v-label class="text-caption font-weight-medium mt-4 mb-1 d-block">
+                                    Stock availability
+                                </v-label>
+
+                                <v-select
+                                    v-model="productForm.stockStatus"
+                                    :items="stockStatusOptions"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    color="primary"
+                                    hide-details
+                                >
+                                    <template #selection="{ item }">
+                                        <v-chip
+                                            :color="
+                                                item.value === 'available'
+                                                    ? 'success'
+                                                    : item.value === 'low_stock'
+                                                    ? 'warning'
+                                                    : 'error'
+                                            "
+                                            variant="tonal"
+                                            size="small"
+                                        >
+                                            {{ item.title }}
+                                        </v-chip>
+                                    </template>
+                                </v-select>
                             </v-card-text>
                         </v-card>
+                    </v-col>
+                </v-row>
 
-                        <!-- Card: Actions -->
+                <!-- ─────────────────────────────────────────────── -->
+                <!-- ACTIONS — Full width                            -->
+                <!-- ─────────────────────────────────────────────── -->
+                <v-row class="mt-2">
+                    <v-col cols="12">
                         <v-card variant="outlined" rounded="lg">
-                            <v-card-text class="pa-4">
+                            <v-card-text class="pa-4 d-flex ga-3">
                                 <v-btn
                                     color="primary"
                                     variant="flat"
                                     rounded="md"
-                                    block
                                     size="large"
                                     :loading="isLoading"
                                     @click="submitForm"
-                                    class="mb-2"
+                                    style="flex: 1;"
                                 >
                                     <v-icon start>mdi-check</v-icon>
-                                    {{
-                                        isEditMode
-                                            ? "Update Product"
-                                            : "Create Product"
-                                    }}
+                                    {{ isEditMode ? "Update Product" : "Create Product" }}
                                 </v-btn>
                                 <v-btn
                                     color="error"
-                                    variant="text"
+                                    variant="outlined"
                                     rounded="md"
-                                    block
+                                    size="large"
                                     @click="router.push('/ecommerce/product')"
+                                    style="flex: 1;"
                                 >
                                     Cancel
                                 </v-btn>

@@ -51,17 +51,21 @@ router.beforeEach(async (to, from, next) => {
             return next('/auth/login');
         }
 
-        // Cek 2 — hapus pengecekan role string, ganti ke permission
+        // Cek 2 — kalau route butuh Super Admin, cek permission
+        if (to.matched.some((record) => record.meta.requiresSuperAdmin)) {
+            // Bukan role string lagi, tapi cek permission
+            if (!access.hasPermission('user-management.access')) {
+                return next('/'); // dealer balik ke halaman produk
+            }
+        }
+
+        // Cek 3 — cek permissions per route
         if (to.meta.permissions) {
             const requiredPermissions = to.meta.permissions as string[];
             if (!access.hasAnyPermission(requiredPermissions)) {
                 return next('/pages/error');
             }
         }
-
-        // Cek 3 — route khusus yang butuh permission tertentu
-        // Contoh di route definition:
-        // meta: { requiresAuth: true, permissions: ['user-management.access'] }
         
         return next();
     }

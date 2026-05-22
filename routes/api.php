@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\User\UserController;
 
 /*
@@ -61,6 +63,46 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/login-activity-logs', function () {
         return [];
+    });
+
+    // ─────────────────────────────────────────────
+    // Product Management
+    // ─────────────────────────────────────────────
+    Route::middleware('can:product-management.access')->group(function () {
+        Route::get('products', [ProductController::class, 'index']);
+        Route::get('products/{product}', [ProductController::class, 'show']);
+    });
+
+    Route::middleware('can:product-management.create')->group(function () {
+        Route::post('products', [ProductController::class, 'store']);
+    });
+
+    Route::middleware('can:product-management.edit')->group(function () {
+        Route::put('products/{product}', [ProductController::class, 'update']);
+    });
+
+    Route::middleware('can:product-management.delete')->group(function () {
+        Route::delete('products/{product}', [ProductController::class, 'destroy']);
+    });
+
+    // ─────────────────────────────────────────────
+    // Category Management
+    // ─────────────────────────────────────────────
+    Route::middleware('can:product-management.access')->group(function () {
+        Route::get('categories', [CategoryController::class, 'index']);
+        Route::get('categories/{category}', [CategoryController::class, 'show']);
+    });
+
+    Route::middleware('can:product-management.create')->group(function () {
+        Route::post('categories', [CategoryController::class, 'store']);
+    });
+
+    Route::middleware('can:product-management.edit')->group(function () {
+        Route::put('categories/{category}', [CategoryController::class, 'update']);
+    });
+
+    Route::middleware('can:product-management.delete')->group(function () {
+        Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
     });
 });
 
