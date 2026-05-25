@@ -18,7 +18,11 @@ use App\Http\Controllers\User\UserController;
 |
 */
 
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
+    Route::post('/dealer/login', [AuthController::class, 'loginDealer']);
+
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 

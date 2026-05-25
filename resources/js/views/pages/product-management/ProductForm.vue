@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useProductStore } from "@/stores/product-management/product-store";
+import { useCategoryStore } from "@/stores/category-management/categories-store";
+import { getCurrentInstance } from "vue"
+const { appContext } = getCurrentInstance()!
+const filters = appContext.config.globalProperties.filters
 
 import BaseBreadcrumb from "@/components/shared/BaseBreadcrumb.vue";
+
 
 // ============================================================
 // PROPS
@@ -23,6 +29,8 @@ const router = useRouter();
 // STATE — Page & Breadcrumb
 // ============================================================
 const isEditMode = computed(() => !!props.id);
+const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 
 const page = computed(() => ({
     title: isEditMode.value ? "Edit Product" : "Create Product",
@@ -143,10 +151,6 @@ const onTagKeydown = (event: KeyboardEvent) => {
 // ============================================================
 // STATE — Currency Format
 // ============================================================
-const formatCurrency = (value: number | null) => {
-    if (!value && value !== 0) return "";
-    return new Intl.NumberFormat("id-ID").format(value);
-};
 
 const onPriceInput = (field: "originalPrice" | "dealerPrice", event: Event) => {
     const input = event.target as HTMLInputElement;
@@ -170,26 +174,34 @@ const rules = {
 // FUNCTIONS — Submit & Reset
 // ============================================================
 const submitForm = async () => {
-    // const { valid } = await productFormRef.value.validate();
-    // if (!valid) return;
-
     isLoading.value = true;
+
     try {
-        const payload = {
-            ...productForm.value,
-            image: imageFile.value,
-        };
+        // Mapping balik dari productForm (camelCase) ke store.form (snake_case)
+        productStore.form.name = productForm.value.name;
+        productStore.form.description = productForm.value.description;
+        productStore.form.sku = productForm.value.sku;
+        productStore.form.original_price = productForm.value.originalPrice;
+        productStore.form.dealer_price = productForm.value.dealerPrice;
+        productStore.form.stock_status = productForm.value.stockStatus;
+        productStore.form.categories = productForm.value.categories;
+        productStore.form.status = productForm.value.status as any;
+
+        // Kasih tau store file image yang dipilh user
+        productStore.setImageFile(imageFile.value);
 
         if (isEditMode.value) {
-            // await ProductStore.updateProduct(props.id, payload);
-            console.log("Update payload:", payload);
+            await productStore.updateProduct(Number(props.id));
         } else {
-            // await ProductStore.addProduct(payload);
-            console.log("Create payload:", payload);
+            await productStore.createProduct();
             resetForm();
         }
 
         router.push("/ecommerce/product");
+    } catch (err) {
+        // Error sudah di-handle di store (productStore.error)
+        // Bisa tambah snackbar/alert di sini kalau mau
+        console.error("Failed to submit form:", err);
     } finally {
         isLoading.value = false;
     }
@@ -215,10 +227,34 @@ const resetForm = () => {
 // LIFECYCLE
 // ============================================================
 onMounted(async () => {
-    if (!isEditMode.value) return;
-    // const detail = await ProductStore.getDetail(props.id);
-    // productForm.value = { ...detail };
-    // imagePreview.value = detail.image;
+    await categoryStore.fetchCategories();
+    console.log('Fetched categories:', categoryStore.listItems);
+    await productStore.fetchProducts();
+
+    if (isEditMode.value) {
+        await productStore.fetchProduct(Number(props.id));
+        // Map dari store.form ke productForm local
+        // (nama field store dan form sedikit beda, jadi perlu mapping manual)
+        const f = productStore.form;
+        productForm.value = {
+            name: f.name,
+            description: f.description,
+            sku: f.sku,
+            originalPrice: f.original_price,       // <- store pakai snak_case
+            dealerPrice: f.dealer_price,          // <- store pakai snak_case
+            stockStatus: f.stock_status,          // <- store pakai snak_case
+            categories: f.categories || [],
+            status: f.status,
+            rating:  0,
+            tags:  [],
+        }
+
+        // Kalau ada existing image, tampilkan previes dari URL nya
+        const product = productStore.listItems.find(p => p.id === Number(props.id));
+        if (product?.image_url) {
+            imagePreview.value = product.image_url;
+        }
+    }
 });
 </script>
 
@@ -358,11 +394,7 @@ onMounted(async () => {
                                             <span class="text-error">*</span>
                                         </v-label>
                                         <v-text-field
-                                            :model-value="
-                                                formatCurrency(
-                                                    productForm.originalPrice,
-                                                )
-                                            "
+                                            :model-value="filters.formatNumber(productForm.originalPrice)"
                                             @input="
                                                 onPriceInput(
                                                     'originalPrice',
@@ -386,7 +418,7 @@ onMounted(async () => {
                                         >
                                         <v-text-field
                                             :model-value="
-                                                formatCurrency(
+                                                filters.formatNumber(
                                                     productForm.dealerPrice,
                                                 )
                                             "
@@ -571,7 +603,9 @@ onMounted(async () => {
                                 </v-label>
                                 <v-autocomplete
                                     v-model="productForm.categories"
-                                    :items="categoryOptions"
+                                    :items="categoryStore.listItems"
+                                    item-title="name"
+                                    item-value="id"
                                     variant="outlined"
                                     density="comfortable"
                                     color="primary"
@@ -589,7 +623,7 @@ onMounted(async () => {
                                             variant="tonal"
                                             size="small"
                                         >
-                                            {{ item.title }}
+                                            {{ item.raw.name }}
                                         </v-chip>
                                     </template>
                                 </v-autocomplete>

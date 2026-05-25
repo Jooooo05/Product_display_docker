@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { router } from '@/router';
 import axios from '@/utils/axios';
+import apiClient from '@/utils/axios';
 import { useAccessStore } from './user-management/access-store';
 
 export const useAuthStore = defineStore('auth', {
@@ -10,12 +11,12 @@ export const useAuthStore = defineStore('auth', {
   }),
   actions: {
     async login(username: string, password: string) {
-      const res: any = await axios.post('/auth/login', { email: username, password });
+      const res: any = await apiClient.post('/admin/login', { email: username, password });
 
       const token = res.access_token;
       this.user = { token };
 
-      const userProfile: any = await axios.get('/auth/me');
+      const userProfile: any = await apiClient.get('/auth/me');
       const user = { ...userProfile, token };
 
       this.user = user;
@@ -36,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchProfile() {
       try {
-        const userProfile: any = await axios.get('/auth/me');
+        const userProfile: any = await apiClient.get('/auth/me');
         const token = this.user?.token;
         const user = { ...userProfile, token };
 
@@ -65,7 +66,7 @@ export const useAuthStore = defineStore('auth', {
         if (window.Echo) {
           window.Echo.leave(`App.Models.User.${this.user.id}`);
         }
-        await axios.post('/auth/logout');
+        await apiClient.post('/auth/logout');
       } catch (error) {
         console.error('Logout failed:', error);
       } finally {

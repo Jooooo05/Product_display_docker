@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from '@/utils/axios';
+import apiClient from '@/utils/axios';
 
 export const useRoleStore = defineStore('role', {
     state: () => ({
@@ -11,7 +12,7 @@ export const useRoleStore = defineStore('role', {
     actions: {
         async fetchPermissions() {
             try {
-                const response: any = await axios.get('/permissions');
+                const response: any = await apiClient.get('/permissions');
                 if (response.data) {
                     const grouped: any = {};
                     response.data.forEach((p: any) => {
@@ -48,7 +49,7 @@ export const useRoleStore = defineStore('role', {
             this.loading = true;
             this.error = null;
             try {
-                const response: any = await axios.get('/roles');
+                const response: any = await apiClient.get('/roles');
                 // Backend returns { success: true, message: '...', data: [...] }
                 this.listItems = response.data;
             } catch (error: any) {
@@ -62,7 +63,7 @@ export const useRoleStore = defineStore('role', {
             this.loading = true;
             this.error = null;
             try {
-                const response: any = await axios.post('/roles', payload);
+                const response: any = await apiClient.post('/roles', payload);
                 await this.fetchRoles(); // Refresh list
                 return response;
             } catch (error: any) {
@@ -76,7 +77,7 @@ export const useRoleStore = defineStore('role', {
             this.loading = true;
             this.error = null;
             try {
-                const response: any = await axios.put(`/roles/${id}`, payload);
+                const response: any = await apiClient.put(`/roles/${id}`, payload);
                 await this.fetchRoles(); // Refresh list
                 return response;
             } catch (error: any) {
@@ -90,7 +91,7 @@ export const useRoleStore = defineStore('role', {
             this.loading = true;
             this.error = null;
             try {
-                const response: any = await axios.delete(`/roles/${id}`);
+                const response: any = await apiClient.delete(`/roles/${id}`);
                 await this.fetchRoles(); // Refresh list
                 return response;
             } catch (error: any) {

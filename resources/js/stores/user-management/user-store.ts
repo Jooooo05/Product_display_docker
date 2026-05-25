@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from '@/utils/axios';
+import apiClient from '@/utils/axios';
 import { useAuthStore } from '@/stores/auth';
 
 let searchTimeout: number | undefined;
@@ -59,7 +60,7 @@ export const useUserStore = defineStore({
     async fetchActivityLogs(userId: number) {
       this.loading = true;
       try {
-        const response: any = await axios.get(`/login-activity-logs?user_id=${userId}`);
+        const response: any = await apiClient.get(`/login-activity-logs?user_id=${userId}`);
         return response.data || [];
       } catch (err: any) {
         console.error('Failed to fetch activity logs:', err);
@@ -86,7 +87,7 @@ export const useUserStore = defineStore({
         }
 
         const url = `/users?${params.toString()}`;
-        const response: any = await axios.get(url);
+        const response: any = await apiClient.get(url);
         const users = response.data ?? response;
 
         this.listItems = Array.isArray(users)
@@ -129,7 +130,7 @@ export const useUserStore = defineStore({
       try {
         const url = `/users`;
         const payload: UserForm = { ...this.form };
-        const response: any = await axios.post(url, payload);
+        const response: any = await apiClient.post(url, payload);
         this.success = response.message || 'User created successfully';
         // this.resetForm(); // Removed to prevent UI clearing before navigation
         await this.fetchUsers();
@@ -152,7 +153,7 @@ export const useUserStore = defineStore({
       this.error = null;
       try {
         const url = `/users/${id}`;
-        const response: any = await axios.get(url);
+        const response: any = await apiClient.get(url);
         const user = response.data ?? response;
 
         // Populate form
@@ -193,7 +194,7 @@ export const useUserStore = defineStore({
                 delete payload.password;
             }
 
-            const response: any = await axios.put(url, payload);
+            const response: any = await apiClient.put(url, payload);
             this.success = response.message || 'User updated successfully';
             await this.fetchUsers();
             return response;

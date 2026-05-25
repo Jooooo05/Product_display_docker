@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function loginAdmin(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+            'email'    => ['required', 'email', 'max:255'],
+            'password' =>  ['required', 'string', 'min:8', 'max:100'],
         ]);
 
         if (!Auth::attempt($credentials)) {
@@ -20,6 +20,26 @@ class AuthController extends Controller
 
         $user  = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type'   => 'Bearer',
+        ]);
+    }
+
+    public function loginDealer(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => ['required', 'email:rfc,dns', 'max:255'],
+            'password' =>  ['required', 'string', 'min:8', 'max:100'],
+        ]);
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Invalid login details'], 401);
+        }
+
+        $user  = Auth::user();
+        $token = $user->createToken('dealer-token', ['dealer'], now()->addHours(8))->plainTextToken;
 
         return response()->json([
             'access_token' => $token,
