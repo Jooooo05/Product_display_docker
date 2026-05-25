@@ -48,14 +48,7 @@ const breadcrumbs = ref([
 // ============================================================
 // STATE — Options
 // ============================================================
-const categoryOptions = [
-    "Electronics",
-    "Fashion",
-    "Sports",
-    "Home & Living",
-    "Books",
-    "Toys",
-];
+
 const statusOptions = ["Active", "Inactive", "Draft"];
 
 const stockStatusOptions = [
@@ -80,8 +73,6 @@ const productForm = ref({
     sku: "",
     categories: [] as string[],
     status: "Active",
-    rating: 0,
-    tags: [] as string[],
 });
 
 // ============================================================
@@ -129,24 +120,6 @@ const removeImage = () => {
 // ============================================================
 const tagInput = ref("");
 
-const addTag = () => {
-    const tag = tagInput.value.trim();
-    if (tag && !productForm.value.tags.includes(tag)) {
-        productForm.value.tags.push(tag);
-    }
-    tagInput.value = "";
-};
-
-const removeTag = (index: number) => {
-    productForm.value.tags.splice(index, 1);
-};
-
-const onTagKeydown = (event: KeyboardEvent) => {
-    if (event.key === "Enter" || event.key === ",") {
-        event.preventDefault();
-        addTag();
-    }
-};
 
 // ============================================================
 // STATE — Currency Format
@@ -176,6 +149,8 @@ const rules = {
 const submitForm = async () => {
     isLoading.value = true;
 
+    console.log("Submitting form with data:", productForm.value);
+
     try {
         // Mapping balik dari productForm (camelCase) ke store.form (snake_case)
         productStore.form.name = productForm.value.name;
@@ -197,7 +172,6 @@ const submitForm = async () => {
             resetForm();
         }
 
-        router.push("/ecommerce/product");
     } catch (err) {
         // Error sudah di-handle di store (productStore.error)
         // Bisa tambah snackbar/alert di sini kalau mau
@@ -217,8 +191,6 @@ const resetForm = () => {
         sku: "",
         categories: [],
         status: "Active",
-        rating: 0,
-        tags: [],
     };
     removeImage();
 };
@@ -245,8 +217,6 @@ onMounted(async () => {
             stockStatus: f.stock_status,          // <- store pakai snak_case
             categories: f.categories || [],
             status: f.status,
-            rating:  0,
-            tags:  [],
         }
 
         // Kalau ada existing image, tampilkan previes dari URL nya

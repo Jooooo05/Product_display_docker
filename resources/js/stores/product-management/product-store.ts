@@ -86,6 +86,7 @@ export const useProductStore = defineStore({
         async fetchProducts() {
             this.loading = true;
             this.error = null;
+            console.log('test function berjalan atau tidak');
             try {
                 const params = new URLSearchParams();
                 if (this.search) {
@@ -94,6 +95,8 @@ export const useProductStore = defineStore({
 
                 const response: any = await apiClient.get(`/products?${params.toString()}`);
                 const products = response.data ?? response;
+
+                console.log('Fetched products:', products);
 
                 this.listItems = Array.isArray(products) ? products : [];
             } catch (err: any) {

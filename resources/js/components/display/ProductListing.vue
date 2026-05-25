@@ -1,99 +1,103 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { orderBy } from "lodash";
 import ProductItem from "./ProductItem.vue";
+import { useProductStore } from "@/stores/product-management/product-store";
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
-const dummyProducts = [
-    {
-        id: 1,
-        name: "Nikon Coolpix B500",
-        description: "Point and shoot camera with 40x optical zoom and built-in Wi-Fi connectivity.",
-        salePrice: 15,
-        offerPrice: 20,
-        rating: 0.5,
-        image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80",
-        categories: ["electronics"],
-        gender: "kids",
-    },
-    {
-        id: 2,
-        name: "Apple MacBook Air",
-        description: "Lightweight laptop featuring Apple M2 chip, stunning Retina display, and all-day battery.",
-        salePrice: 16,
-        offerPrice: 14,
-        rating: 1.5,
-        image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=400&q=80",
-        categories: ["electronics"],
-        gender: "male",
-    },
-    {
-        id: 3,
-        name: "Luxury Silver Watch",
-        description: "Swiss-made automatic movement with sapphire crystal and stainless steel bracelet.",
-        salePrice: 36,
-        offerPrice: 29,
-        rating: 2.3,
-        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-        categories: ["fashion"],
-        gender: "male",
-    },
-    {
-        id: 4,
-        name: "Smart Watch Pro",
-        description: "Feature-rich smartwatch with health tracking, GPS, and 7-day battery life.",
-        salePrice: 85,
-        offerPrice: 49,
-        rating: 2.5,
-        image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&q=80",
-        categories: ["electronics"],
-        gender: "female",
-    },
-    {
-        id: 5,
-        name: "Wireless Headphones",
-        description: "Premium noise-cancelling headphones with 30-hour battery and Hi-Res audio support.",
-        salePrice: 45,
-        offerPrice: 60,
-        rating: 4.2,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-        categories: ["electronics"],
-        gender: "kids",
-    },
-    {
-        id: 6,
-        name: "Running Sneakers",
-        description: "Lightweight performance trainers with responsive cushioning and breathable mesh upper.",
-        salePrice: 62,
-        offerPrice: 79,
-        rating: 3.8,
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-        categories: ["fashion"],
-        gender: "female",
-    },
-    {
-        id: 7,
-        name: "Leather Backpack",
-        description: "Handcrafted full-grain leather backpack with padded laptop sleeve and antique brass hardware.",
-        salePrice: 110,
-        offerPrice: 130,
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80",
-        categories: ["fashion"],
-        gender: "male",
-    },
-    {
-        id: 8,
-        name: "Mechanical Keyboard",
-        description: "Compact TKL mechanical keyboard with tactile switches, RGB backlight, and aluminium frame.",
-        salePrice: 89,
-        offerPrice: 105,
-        rating: 4.4,
-        image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80",
-        categories: ["electronics"],
-        gender: "kids",
-    },
-];
+// const dummyProducts = [
+//     {
+//         id: 1,
+//         name: "Nikon Coolpix B500",
+//         description: "Point and shoot camera with 40x optical zoom and built-in Wi-Fi connectivity.",
+//         salePrice: 15,
+//         offerPrice: 20,
+//         rating: 0.5,
+//         image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80",
+//         categories: ["electronics"],
+//         gender: "kids",
+//     },
+//     {
+//         id: 2,
+//         name: "Apple MacBook Air",
+//         description: "Lightweight laptop featuring Apple M2 chip, stunning Retina display, and all-day battery.",
+//         salePrice: 16,
+//         offerPrice: 14,
+//         rating: 1.5,
+//         image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=400&q=80",
+//         categories: ["electronics"],
+//         gender: "male",
+//     },
+//     {
+//         id: 3,
+//         name: "Luxury Silver Watch",
+//         description: "Swiss-made automatic movement with sapphire crystal and stainless steel bracelet.",
+//         salePrice: 36,
+//         offerPrice: 29,
+//         rating: 2.3,
+//         image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
+//         categories: ["fashion"],
+//         gender: "male",
+//     },
+//     {
+//         id: 4,
+//         name: "Smart Watch Pro",
+//         description: "Feature-rich smartwatch with health tracking, GPS, and 7-day battery life.",
+//         salePrice: 85,
+//         offerPrice: 49,
+//         rating: 2.5,
+//         image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&q=80",
+//         categories: ["electronics"],
+//         gender: "female",
+//     },
+//     {
+//         id: 5,
+//         name: "Wireless Headphones",
+//         description: "Premium noise-cancelling headphones with 30-hour battery and Hi-Res audio support.",
+//         salePrice: 45,
+//         offerPrice: 60,
+//         rating: 4.2,
+//         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+//         categories: ["electronics"],
+//         gender: "kids",
+//     },
+//     {
+//         id: 6,
+//         name: "Running Sneakers",
+//         description: "Lightweight performance trainers with responsive cushioning and breathable mesh upper.",
+//         salePrice: 62,
+//         offerPrice: 79,
+//         rating: 3.8,
+//         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+//         categories: ["fashion"],
+//         gender: "female",
+//     },
+//     {
+//         id: 7,
+//         name: "Leather Backpack",
+//         description: "Handcrafted full-grain leather backpack with padded laptop sleeve and antique brass hardware.",
+//         salePrice: 110,
+//         offerPrice: 130,
+//         rating: 4.7,
+//         image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80",
+//         categories: ["fashion"],
+//         gender: "male",
+//     },
+//     {
+//         id: 8,
+//         name: "Mechanical Keyboard",
+//         description: "Compact TKL mechanical keyboard with tactile switches, RGB backlight, and aluminium frame.",
+//         salePrice: 89,
+//         offerPrice: 105,
+//         rating: 4.4,
+//         image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80",
+//         categories: ["electronics"],
+//         gender: "kids",
+//     },
+// ];
+
+// STORES
+const productStore = useProductStore();
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const sortOptions = ["Price: Low to High", "Price: High to Low", "Popularity", "Fresh Arrivals"];
@@ -103,7 +107,7 @@ const showFilter = ref(true);
 
 // ─── Filtering & Sorting ──────────────────────────────────────────────────────
 const filteredProducts = computed(() => {
-    let list = [...dummyProducts];
+    let list = [...productStore.listItems];
 
     if (selectedSort.value === "Popularity") {
         list = orderBy(list, ["rating"], ["desc"]);
@@ -123,6 +127,11 @@ const filteredProducts = computed(() => {
     }
 
     return list;
+});
+
+onMounted(async () => {
+    console.log("ProductListing component mounted");
+    await productStore.fetchProducts();
 });
 </script>
 
@@ -224,12 +233,11 @@ const filteredProducts = computed(() => {
                 <ProductItem
                     v-for="product in filteredProducts"
                     :key="product.id"
-                    :name="product.name"
-                    :image="product.image"
-                    :desc="product.description"
-                    :salePrice="product.salePrice"
-                    :offerPrice="product.offerPrice"
-                    :rating="product.rating"
+                    :name="product.name ?? undefined"
+                    :image="product.image ?? undefined"
+                    :desc="product.description ?? undefined"
+                    :salePrice="product.original_price ?? undefined"
+                    :offerPrice="product.dealer_price ?? undefined"
                     :goto="product.id"
                 />
             </transition-group>

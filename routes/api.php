@@ -18,6 +18,9 @@ use App\Http\Controllers\User\UserController;
 |
 */
 
+Route::get('products', [ProductController::class, 'index']);
+Route::get('products/{product}', [ProductController::class, 'show']);
+
 Route::middleware('throttle:5,1')->group(function () {
     Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
     Route::post('/dealer/login', [AuthController::class, 'loginDealer']);
@@ -73,8 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Product Management
     // ─────────────────────────────────────────────
     Route::middleware('can:product-management.access')->group(function () {
-        Route::get('products', [ProductController::class, 'index']);
-        Route::get('products/{product}', [ProductController::class, 'show']);
+
     });
 
     Route::middleware('can:product-management.create')->group(function () {

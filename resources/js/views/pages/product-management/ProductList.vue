@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
-
+import { ref, shallowRef, onMounted } from 'vue';
+import { useProductStore } from '@/stores/product-management/product-store';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import ProductListing from '@/components/display/ProductListing.vue';
 
@@ -13,6 +13,15 @@ const breadcrumbs = shallowRef([
     description: ''
   }
 ]);
+
+// STORES
+const productStore = useProductStore();
+
+// STATE
+onMounted(async () => {
+  console.log('ProductList component mounted');
+  // await productStore.fetchProducts();
+});
 </script>
 
 <template>

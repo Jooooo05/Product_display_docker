@@ -2,15 +2,13 @@
 import { ref } from "vue";
 
 const props = defineProps({
-    name: String,
-    image: String,
-    desc: String,
-    rating: Number,
-    salePrice: Number,
-    offerPrice: Number,
-    goto: [Number, String],
+    name:       { type: String,         default: 'Unknown Product' },
+    image:      { type: String,         default: '/images/placeholder.png' },
+    desc:       { type: String,         default: 'No description available' },
+    salePrice:  { type: Number,         default: 0 },
+    offerPrice: { type: Number,         default: null },
+    goto:       { type: [Number, String], default: '#' },
 });
-
 const isInWishlist = ref(false);
 
 function toggleWishlist() {
@@ -40,19 +38,6 @@ function toggleWishlist() {
         </v-card-item>
 
         <v-card-text class="pt-2">
-            <!-- Rating -->
-            <div class="d-flex align-center ga-1 mb-2">
-                <v-rating
-                    :model-value="rating"
-                    density="compact"
-                    size="x-small"
-                    color="warning"
-                    active-color="warning"
-                    readonly
-                    half-increments
-                />
-                <span class="text-caption text-medium-emphasis">({{ rating }})</span>
-            </div>
 
             <!-- Price -->
             <div class="d-flex align-center ga-2">
