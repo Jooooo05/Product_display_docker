@@ -62,7 +62,7 @@ class AuthController extends Controller
             'is_dealer'       => $user->hasRole('dealer'),
             // Tidak return 'role' string mentah
             // Permission list otomatis kosong untuk dealer (tidak punya permission)
-            'permission_list' => $user->getPermissionNames(),
+            'permission_list' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
 

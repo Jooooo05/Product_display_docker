@@ -18,13 +18,10 @@ class ProductController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user(); // null kalau tidak login
 
         $products = Product::with('categories')
             ->latest()
             ->paginate(15);
-
-        //Transform bedasarkan siapa yang request
 
         return response()->json($products);
     }
@@ -44,7 +41,7 @@ class ProductController extends Controller
             'status'         => ['sometimes', Rule::in(['Active', 'Inactive', 'Draft'])],
             'stock_status'   => ['sometimes', Rule::in(['available', 'low_stock', 'out_of_stock'])],
             'categories'     => ['sometimes', 'array'],
-            'categories.*'   => ['string'],
+            'categories.*'   => ['integer', 'exists:categories,id'], 
             'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
@@ -61,9 +58,9 @@ class ProductController extends Controller
         $product = Product::create($validated);
 
         // Sync categories (create if not exists)
+        // Sync categories
         if (!empty($validated['categories'])) {
-            $categoryIds = $this->resolveCategoryIds($validated['categories']);
-            $product->categories()->sync($categoryIds);
+            $product->categories()->sync($validated['categories']); // ← langsung pakai, tidak perlu resolve
         }
 
         return response()->json(
@@ -76,11 +73,10 @@ class ProductController extends Controller
     // GET /products/{id}
     // ─────────────────────────────────────────────
 
-    public function show(Product $product): JsonResponse
+    public function show($id): JsonResponse
     {
-        return response()->json(
-            $product->load('categories')
-        );
+        $product = Product::with('categories')->findOrFail($id);
+        return response()->json($product);
     }
 
     // ─────────────────────────────────────────────
@@ -98,7 +94,7 @@ class ProductController extends Controller
             'status'         => ['sometimes', Rule::in(['Active', 'Inactive', 'Draft'])],
             'stock_status'   => ['sometimes', Rule::in(['available', 'low_stock', 'out_of_stock'])],
             'categories'     => ['sometimes', 'array'],
-            'categories.*'   => ['string'],
+            'categories.*'   => ['integer', 'exists:categories,id'], 
             'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
@@ -112,12 +108,10 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        // Sync categories
+        // Tangani dua kondisi sekaligus
         if (isset($validated['categories'])) {
-            $categoryIds = $this->resolveCategoryIds($validated['categories']);
-            $product->categories()->sync($categoryIds);
+            $product->categories()->sync($validated['categories']); // array kosong pun akan detach semua
         }
-
         return response()->json(
             $product->load('categories')
         );
@@ -141,12 +135,7 @@ class ProductController extends Controller
     /**
      * Resolve category names → IDs, creating missing ones.
      */
-    private function resolveCategoryIds(array $names): array
-    {
-        return collect($names)
-            ->map(fn (string $name) => Category::firstOrCreate(['name' => $name])->id)
-            ->toArray();
-    }
+
 
     /**
      * Generate a unique SKU from the product name.

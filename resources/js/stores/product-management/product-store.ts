@@ -13,7 +13,7 @@ interface ProductForm {
     dealer_price: number | null;
     status: 'Active' | 'Inactive' | 'Draft';
     stock_status: 'available' | 'low_stock' | 'out_of_stock';
-    categories: string[];
+    categories: number[];
 }
 
 interface ProductItem {
@@ -135,9 +135,7 @@ export const useProductStore = defineStore({
                     dealer_price: product.dealer_price ?? null,
                     status: product.status,
                     stock_status: product.stock_status,
-                    categories: Array.isArray(product.categories)
-                        ? product.categories.map((c: any) => c.name)
-                        : [],
+                    categories: Array.isArray(product.categories) ? product.categories.map((c: any) => c.id) : [],
                 };
 
                 return product;
@@ -265,7 +263,7 @@ export const useProductStore = defineStore({
 
             // Categories dikirim sebagai array
             this.form.categories.forEach((cat) => {
-                fd.append('categories[]', cat);
+                fd.append('categories[]', String(cat));
             });
 
             // Image hanya append kalau ada file baru

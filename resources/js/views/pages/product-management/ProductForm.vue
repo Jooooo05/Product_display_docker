@@ -71,7 +71,7 @@ const productForm = ref({
     dealerPrice: null as number | null,
     stockStatus: 'available' as 'available' | 'low_stock' | 'out_of_stock',
     sku: "",
-    categories: [] as string[],
+    categories: [] as number[],
     status: "Active",
 });
 
