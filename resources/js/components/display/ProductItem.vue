@@ -1,27 +1,34 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { getCurrentInstance } from "vue"
+const { appContext } = getCurrentInstance()!
+const filters = appContext.config.globalProperties.filters
 
-const props = defineProps({
-    name:       { type: String,         default: 'Unknown Product' },
-    image:      { type: String,         default: '/images/placeholder.png' },
-    desc:       { type: String,         default: 'No description available' },
-    salePrice:  { type: Number,         default: 0 },
-    offerPrice: { type: Number,         default: null },
-    goto:       { type: [Number, String], default: '#' },
-});
+const props = defineProps<{
+    name?: string
+    image?: string
+    desc?: string
+    originalPrice?: number
+    dealerPrice?: number
+    goto?: number | string
+    // ✅ Tambah ini
+    actions?: { title: string; action: string; color?: string }[]
+}>();
+
 const isInWishlist = ref(false);
 
 function toggleWishlist() {
     isInWishlist.value = !isInWishlist.value;
 }
+const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | string }): void }>();
 </script>
 
 <template>
-    <v-card variant="outlined" rounded="lg" class="product-card bg-surface overflow-hidden">
+    <v-card variant="outlined" rounded="lg" class="product-card bg-surface overflow-hidden" style="position: relative">
 
         <!-- Image Area -->
         <router-link :to="`/ecommerce/product/detail/${goto}`" class="image-wrapper d-block">
-            <img :src="image" :alt="name" class="product-image" />
+            <img :src="`http://127.0.0.1:8000/storage/${image}`" :alt="name" class="product-image" />
             <div class="image-overlay" />
         </router-link>
 
@@ -41,10 +48,42 @@ function toggleWishlist() {
 
             <!-- Price -->
             <div class="d-flex align-center ga-2">
-                <span class="text-subtitle-1 font-weight-bold">${{ salePrice }}</span>
-                <span class="text-caption text-medium-emphasis text-decoration-line-through">${{ offerPrice }}</span>
+                <span class="text-subtitle-1 font-weight-bold">{{ filters.formatMoney(dealerPrice) }}</span>
+                <span class="text-caption text-medium-emphasis text-decoration-line-through">{{ filters.formatMoney(originalPrice, false, false, 0) }}</span>
             </div>
         </v-card-text>
+
+        <!-- ✅ Tambah blok ini -->
+        <template v-if="actions?.length">
+            <v-menu location="bottom end">
+                <template #activator="{ props: menuProps }">
+                    <v-btn
+                        icon
+                        variant="flat"
+                        color="surface"
+                        density="comfortable"
+                        v-bind="menuProps"
+                        rounded="md"
+                        style="position: absolute; top: 8px; right: 8px"
+                        @click.stop
+                    >
+                        <SvgSprite name="custom-more-outline" style="width: 16px; height: 16px; transform: rotate(90deg)" />
+                    </v-btn>
+                </template>
+
+                <v-list rounded="md" class="py-1" min-width="140">
+                    <v-list-item
+                        v-for="(item, i) in actions"
+                        :key="i"
+                        class="py-1 px-3"
+                        :class="item.color ? `text-${item.color}` : ''"
+                        @click="emit('action', { action: item.action, id: goto! })"
+                    >
+                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
+        </template>
 
     </v-card>
 </template>

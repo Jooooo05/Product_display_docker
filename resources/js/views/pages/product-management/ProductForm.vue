@@ -202,8 +202,12 @@ onMounted(async () => {
     await categoryStore.fetchCategories();
     console.log('Fetched categories:', categoryStore.listItems);
     await productStore.fetchProducts();
+    
+
+    console.log('check edit mode:', isEditMode.value, 'with ID:', props.id);
 
     if (isEditMode.value) {
+        console.log('Edit mode, fetching product with ID:', props.id);
         await productStore.fetchProduct(Number(props.id));
         // Map dari store.form ke productForm local
         // (nama field store dan form sedikit beda, jadi perlu mapping manual)

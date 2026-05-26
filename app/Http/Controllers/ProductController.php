@@ -25,28 +25,6 @@ class ProductController extends Controller
             ->paginate(15);
 
         //Transform bedasarkan siapa yang request
-        $products->through(function ($product) use ($user) {
-            
-            $isDealer = $user?->hasRole('dealer');
-
-            return [
-                'id'             => $product->id,
-                'name'           => $product->name,
-                'description'    => $product->description,
-                'sku'            => $product->sku,
-                'image'          => $product->image,
-                'categories'     => $product->categories,
-                'stock_status'   => $product->stock_status,
-                'status'         => $product->status,
-
-                // Selalu ada — harga publik
-                'original_price' => $product->original_price,
-
-                // Hanya muncul kalau dealer
-                'dealer_price'   => $isDealer ? $product->dealer_price : null,
-                'is_dealer'      => $isDealer ?? false,
-            ];
-        });
 
         return response()->json($products);
     }

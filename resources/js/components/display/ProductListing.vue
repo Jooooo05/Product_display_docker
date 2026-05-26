@@ -3,6 +3,9 @@ import { ref, computed, onMounted } from "vue";
 import { orderBy } from "lodash";
 import ProductItem from "./ProductItem.vue";
 import { useProductStore } from "@/stores/product-management/product-store";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
 // const dummyProducts = [
@@ -129,6 +132,26 @@ const filteredProducts = computed(() => {
     return list;
 });
 
+const actionItems = [
+  { title: 'Edit',   action: 'edit' },
+  { title: 'Delete', action: 'delete', color: 'error' },
+]
+
+
+const handleAction = ({ action, id }: { action: string; id: number | string }) => {
+  switch (action) {
+    case 'edit':
+      console.log('edit', id)
+      // navigasi atau buka dialog edit
+      router.push(`/product/${id}/edit`)
+      break
+    case 'delete':
+      console.log('delete', id)
+      // panggil productStore.deleteProduct(id)
+      break
+  }
+}
+
 onMounted(async () => {
     console.log("ProductListing component mounted");
     await productStore.fetchProducts();
@@ -236,9 +259,11 @@ onMounted(async () => {
                     :name="product.name ?? undefined"
                     :image="product.image ?? undefined"
                     :desc="product.description ?? undefined"
-                    :salePrice="product.original_price ?? undefined"
-                    :offerPrice="product.dealer_price ?? undefined"
+                    :originalPrice="product.original_price ?? undefined"
+                    :dealerPrice="product.dealer_price ?? undefined"
                     :goto="product.id"
+                    :actions="actionItems"
+                    @action="handleAction"
                 />
             </transition-group>
 

@@ -18,6 +18,7 @@ const ProductRoute = [
     {
         name: 'Product Edit',
         path: '/product/:id/edit',
+        props: true,
         component: () => import('@/views/pages/product-management/ProductForm.vue'),
         meta: {
             permissions: ['product-management.edit']
