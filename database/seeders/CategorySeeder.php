@@ -14,13 +14,14 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Elektronik'],
-            ['name' => 'Fashion'],
-            ['name' => 'Makanan'],
-            ['name' => 'Minuman'],
-            ['name' => 'Olahraga'],
-            ['name' => 'Kesehatan'],
-            ['name' => 'Otomotif'],
+            ['name' => 'Laptop'],
+            ['name' => 'Smartphone'],
+            ['name' => 'Tablet'],
+            ['name' => 'Monitor'],
+            ['name' => 'Keyboard'],
+            ['name' => 'Mouse'],
+            ['name' => 'Headphone'],
+            ['name' => 'Speaker'],
         ];
 
         DB::table('categories')->insert($categories);

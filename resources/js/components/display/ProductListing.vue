@@ -1,106 +1,18 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, getCurrentInstance, watch } from "vue";
 import { orderBy } from "lodash";
 import ProductItem from "./ProductItem.vue";
 import { useProductStore } from "@/stores/product-management/product-store";
+import { useCategoryStore } from "@/stores/category-management/categories-store.js";
 import { useRouter } from 'vue-router';
+const { appContext } = getCurrentInstance()!
+const filters = appContext.config.globalProperties.filters
 
 const router = useRouter();
 
-// ─── Dummy Data ───────────────────────────────────────────────────────────────
-// const dummyProducts = [
-//     {
-//         id: 1,
-//         name: "Nikon Coolpix B500",
-//         description: "Point and shoot camera with 40x optical zoom and built-in Wi-Fi connectivity.",
-//         salePrice: 15,
-//         offerPrice: 20,
-//         rating: 0.5,
-//         image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80",
-//         categories: ["electronics"],
-//         gender: "kids",
-//     },
-//     {
-//         id: 2,
-//         name: "Apple MacBook Air",
-//         description: "Lightweight laptop featuring Apple M2 chip, stunning Retina display, and all-day battery.",
-//         salePrice: 16,
-//         offerPrice: 14,
-//         rating: 1.5,
-//         image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=400&q=80",
-//         categories: ["electronics"],
-//         gender: "male",
-//     },
-//     {
-//         id: 3,
-//         name: "Luxury Silver Watch",
-//         description: "Swiss-made automatic movement with sapphire crystal and stainless steel bracelet.",
-//         salePrice: 36,
-//         offerPrice: 29,
-//         rating: 2.3,
-//         image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-//         categories: ["fashion"],
-//         gender: "male",
-//     },
-//     {
-//         id: 4,
-//         name: "Smart Watch Pro",
-//         description: "Feature-rich smartwatch with health tracking, GPS, and 7-day battery life.",
-//         salePrice: 85,
-//         offerPrice: 49,
-//         rating: 2.5,
-//         image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&q=80",
-//         categories: ["electronics"],
-//         gender: "female",
-//     },
-//     {
-//         id: 5,
-//         name: "Wireless Headphones",
-//         description: "Premium noise-cancelling headphones with 30-hour battery and Hi-Res audio support.",
-//         salePrice: 45,
-//         offerPrice: 60,
-//         rating: 4.2,
-//         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-//         categories: ["electronics"],
-//         gender: "kids",
-//     },
-//     {
-//         id: 6,
-//         name: "Running Sneakers",
-//         description: "Lightweight performance trainers with responsive cushioning and breathable mesh upper.",
-//         salePrice: 62,
-//         offerPrice: 79,
-//         rating: 3.8,
-//         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-//         categories: ["fashion"],
-//         gender: "female",
-//     },
-//     {
-//         id: 7,
-//         name: "Leather Backpack",
-//         description: "Handcrafted full-grain leather backpack with padded laptop sleeve and antique brass hardware.",
-//         salePrice: 110,
-//         offerPrice: 130,
-//         rating: 4.7,
-//         image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80",
-//         categories: ["fashion"],
-//         gender: "male",
-//     },
-//     {
-//         id: 8,
-//         name: "Mechanical Keyboard",
-//         description: "Compact TKL mechanical keyboard with tactile switches, RGB backlight, and aluminium frame.",
-//         salePrice: 89,
-//         offerPrice: 105,
-//         rating: 4.4,
-//         image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80",
-//         categories: ["electronics"],
-//         gender: "kids",
-//     },
-// ];
-
 // STORES
 const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const sortOptions = ["Price: Low to High", "Price: High to Low", "Popularity", "Fresh Arrivals"];
@@ -108,6 +20,28 @@ const selectedSort = ref("Price: Low to High");
 const searchValue = ref("");
 const showFilter = ref(true);
 
+// paginate
+const currentPage = ref(1);
+const perPage = 20;
+const totalItems = ref(0); // nanti diisi dari response API
+
+const filterForm = ref({
+    categories: [],
+    priceMin: null as number | null,
+    priceMax: null as number | null,
+})
+
+const onPriceInput = (field: "priceMin" | "priceMax", event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const raw = input.value.replace(/[^0-9]/g, "");
+    filterForm.value[field] = raw === "" ? null : Number(raw);
+}
+
+// function applyFilters sementara
+const applyFilters = async () => {
+    currentPage.value = 1;
+    await productStore.fetchProducts(1, filterForm.value);
+}
 // ─── Filtering & Sorting ──────────────────────────────────────────────────────
 const filteredProducts = computed(() => {
     let list = [...productStore.listItems];
@@ -146,15 +80,26 @@ const handleAction = ({ action, id }: { action: string; id: number | string }) =
       router.push(`/product/${id}/edit`)
       break
     case 'delete':
-      console.log('delete', id)
+      console.log('delete', id);
+        productStore.deleteProduct(Number(id));
       // panggil productStore.deleteProduct(id)
       break
   }
 }
 
+// Watch perubahan page → fetch ulang
+watch(currentPage, async (newPage) => {
+    await productStore.fetchProducts(newPage, filterForm.value);
+});
+
+
 onMounted(async () => {
     console.log("ProductListing component mounted");
-    await productStore.fetchProducts();
+    await categoryStore.fetchCategories();
+    await productStore.fetchProducts(1);
+
+    console.log('totalItems:', productStore.totalItems);
+    console.log('lastPage:', productStore.lastPage);
 });
 </script>
 
@@ -190,19 +135,21 @@ onMounted(async () => {
                 <!-- Right: Result count + Slot actions + Sort -->
                 <div class="d-flex align-center ga-2 flex-wrap">
                     <span class="text-caption text-medium-emphasis">
-                        {{ filteredProducts.length }} products
+                        {{ productStore.totalItems }} products
                     </span>
 
                     
                     <v-select
-                    v-model="selectedSort"
-                    :items="sortOptions"
-                    variant="outlined"
-                    density="compact"
-                    hide-details
-                    rounded="md"
-                    style="min-width: 180px; max-width: 200px"
+                        v-model="selectedSort"
+                        :items="sortOptions"
+                        variant="outlined"
+                        density="compact"
+                        hide-details
+                        rounded="md"
+                        style="min-width: 180px; max-width: 200px"
                     />
+
+                    
 
                     <!-- Slot actions opsional (e.g. tombol Create Product) -->
                     <slot name="actions" />
@@ -221,27 +168,72 @@ onMounted(async () => {
 
                 <!-- Category -->
                 <p class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1">Category</p>
-                <v-checkbox label="All" density="compact" hide-details color="primary" :model-value="true" />
-                <v-checkbox label="Electronics" density="compact" hide-details color="primary" />
-                <v-checkbox label="Fashion" density="compact" hide-details color="primary" />
+
+                <v-autocomplete
+                    v-model="filterForm.categories"
+                    :items="categoryStore.listItems"
+                    item-title="name"
+                    item-value="id"
+                    variant="outlined"
+                    density="comfortable"
+                    color="primary"
+                    multiple
+                    chips
+                    closable-chips
+                    hide-details
+                    class="mb-4"
+                >
+                    <template v-slot:chip="{ props, item }">
+                        <v-chip
+                            v-bind="props"
+                            color="primary"
+                            variant="tonal"
+                            size="small"
+                        >
+                            {{ item.raw.name }}
+                        </v-chip>
+                    </template>
+                </v-autocomplete>
 
                 <v-divider class="my-4" />
-
                 <!-- Price Range -->
                 <p class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1">Price Range</p>
-                <v-slider min="0" max="200" color="primary" hide-details class="mt-2" />
-                <div class="d-flex justify-space-between mt-n1">
-                    <span class="text-caption text-medium-emphasis">$0</span>
-                    <span class="text-caption text-medium-emphasis">$200</span>
-                </div>
+                <v-row>
+                    <v-col cols="12">
+                        <v-text-field
+                            :model-value="filters.formatNumber(filterForm.priceMin)"
+                            @input="onPriceInput('priceMin', $event)"
+                            placeholder="Min"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details
+                            rounded="md"
+                            prefix="Rp"
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field
+                            :model-value="filters.formatNumber(filterForm.priceMax)"
+                            @input="onPriceInput('priceMax', $event)"
+                            placeholder="Max"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details
+                            rounded="md"
+                            prefix="Rp"
+                        />
+                    </v-col>
+                </v-row>
+
 
                 <v-divider class="my-4" />
-
-                <!-- Rating -->
-                <p class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1">Rating</p>
-                <v-checkbox label="4★ & above" density="compact" hide-details color="primary" />
-                <v-checkbox label="3★ & above" density="compact" hide-details color="primary" />
-
+                <!-- Button Submit -->
+                <v-btn 
+                    color="primary" 
+                    block 
+                    @click="applyFilters">
+                    Apply Filters
+                </v-btn>
             </v-card-text>
         </v-card>
 
@@ -272,6 +264,20 @@ onMounted(async () => {
                 <v-icon size="52" color="grey-lighten-2">mdi-package-variant-closed</v-icon>
                 <p class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-0">No products found</p>
                 <span class="text-caption text-medium-emphasis">Try adjusting your search or filters.</span>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="productStore.lastPage > 1" class="d-flex align-center justify-space-between mt-6">
+                <span class="text-caption text-medium-emphasis">
+                    Showing {{ (currentPage - 1) * 20 + 1 }}–{{ Math.min(currentPage * 20, productStore.totalItems) }} of {{ productStore.totalItems }} products
+                </span>
+                <v-pagination
+                    v-model="currentPage"
+                    :length="productStore.lastPage"
+                    :total-visible="5"
+                    rounded="md"
+                    color="primary"
+                />
             </div>
         </div>
 

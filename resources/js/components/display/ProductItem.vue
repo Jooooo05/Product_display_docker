@@ -4,6 +4,8 @@ import { getCurrentInstance } from "vue"
 const { appContext } = getCurrentInstance()!
 const filters = appContext.config.globalProperties.filters
 
+const appUrl = import.meta.env.VITE_APP_URL;
+
 const props = defineProps<{
     name?: string
     image?: string
@@ -15,11 +17,9 @@ const props = defineProps<{
     actions?: { title: string; action: string; color?: string }[]
 }>();
 
-const isInWishlist = ref(false);
+// Gambar default, bisa pakai dari assets lokal atau URL online
+const defaultImage = '/assets/images/placeholder_image.jpg';
 
-function toggleWishlist() {
-    isInWishlist.value = !isInWishlist.value;
-}
 const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | string }): void }>();
 </script>
 
@@ -28,7 +28,7 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
 
         <!-- Image Area -->
         <router-link :to="`/ecommerce/product/detail/${goto}`" class="image-wrapper d-block">
-            <img :src="`http://127.0.0.1:8000/storage/${image}`" :alt="name" class="product-image" />
+            <img :src="image ? `${appUrl}/storage/${image}` : defaultImage" :alt="name" class="product-image" />
             <div class="image-overlay" />
         </router-link>
 

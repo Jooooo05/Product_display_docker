@@ -19,9 +19,32 @@ class ProductController extends Controller
     public function index(Request $request): JsonResponse
     {
 
-        $products = Product::with('categories')
-            ->latest()
-            ->paginate(15);
+        $query = Product::with('categories')->latest();
+
+        // Filter by categories
+        if ($request->has('categories')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->whereIn('categories.id', $request->categories);
+            });
+        }
+
+        // Filter by price range
+        if ($request->has('price_min')) {
+            $query->where('original_price', '>=', $request->price_min);
+        }
+
+        if ($request->has('price_max')) {
+            $query->where('original_price', '<=', $request->price_max);
+        }
+
+        // Search
+        if ($request->has('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $products = $query->paginate($request->get('per_page', 20));
 
         return response()->json($products);
     }

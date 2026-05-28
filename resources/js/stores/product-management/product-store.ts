@@ -35,6 +35,9 @@ interface ProductItem {
 
 interface ProductStoreState {
     listItems: ProductItem[];
+    totalItems: number;
+    currentPage: number;
+    lastPage: number;
     categoryOptions: string[];
     search: string;
     loading: boolean;
@@ -59,6 +62,9 @@ export const useProductStore = defineStore({
 
     state: (): ProductStoreState => ({
         listItems: [],
+        totalItems: 0,
+        currentPage: 1,
+        lastPage: 1,
         categoryOptions: [],
         search: '',
         loading: false,
@@ -83,22 +89,45 @@ export const useProductStore = defineStore({
         // FETCH LIST
         // ─────────────────────────────────────────────
 
-        async fetchProducts() {
+        async fetchProducts(
+            page = 1, 
+            filter?: { 
+                categories: number[], 
+                priceMin: number | null, 
+                priceMax: number | null 
+            }) {
             this.loading = true;
             this.error = null;
             console.log('test function berjalan atau tidak');
             try {
                 const params = new URLSearchParams();
+                params.set('page', String(page));
+                params.set('per_page', '12');
+
                 if (this.search) {
                     params.set('search', this.search);
                 }
 
+                // Tambahkan filter params
+                if (filter?.categories?.length) {
+                    filter.categories.forEach(id => params.append('categories[]', String(id)));
+                }
+                if (filter?.priceMin !== null && filter?.priceMin !== undefined) {
+                    params.set('price_min', String(filter.priceMin));
+                }
+                if (filter?.priceMax !== null && filter?.priceMax !== undefined) {
+                    params.set('price_max', String(filter.priceMax));
+                }
+
+                console.log('Fetching:', `/products?${params.toString()}`);
                 const response: any = await apiClient.get(`/products?${params.toString()}`);
-                const products = response.data ?? response;
+                console.log('Response:', response);
 
-                console.log('Fetched products:', products);
+                this.listItems = response.data ?? [];         // array produknya
+                this.totalItems = response.total ?? 0;        // total semua produk
+                this.currentPage = response.current_page ?? 1;
+                this.lastPage = response.last_page ?? 1;
 
-                this.listItems = Array.isArray(products) ? products : [];
             } catch (err: any) {
                 this.error = err?.message || 'Failed to load products';
                 this.listItems = [];

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import { useProductStore } from "@/stores/product-management/product-store";
 import { useCategoryStore } from "@/stores/category-management/categories-store";
-import { getCurrentInstance } from "vue"
 const { appContext } = getCurrentInstance()!
 const filters = appContext.config.globalProperties.filters
 
@@ -225,8 +224,8 @@ onMounted(async () => {
 
         // Kalau ada existing image, tampilkan previes dari URL nya
         const product = productStore.listItems.find(p => p.id === Number(props.id));
-        if (product?.image_url) {
-            imagePreview.value = product.image_url;
+        if (product?.image) {
+            imagePreview.value = `${import.meta.env.VITE_APP_URL}/storage/${product.image}`;
         }
     }
 });
@@ -379,7 +378,7 @@ onMounted(async () => {
                                             variant="outlined"
                                             density="comfortable"
                                             color="primary"
-                                            prefix="$"
+                                            prefix="Rp"
                                             :rules="[rules.required]"
                                         />
                                     </v-col>
@@ -406,7 +405,7 @@ onMounted(async () => {
                                             variant="outlined"
                                             density="comfortable"
                                             color="primary"
-                                            prefix="$"
+                                            prefix="Rp"
                                             hint="Shown as strikethrough"
                                             persistent-hint
                                         />
