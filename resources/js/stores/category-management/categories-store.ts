@@ -58,9 +58,7 @@ export const useCategoryStore = defineStore({
             this.error = null;
 
             try {
-                console.log('test apakah funciton berjalan:' );
                 const response = await apiClient.get<CategoryItem[]>('/categories');
-                console.log('Response from API:', response);
                 this.listItems = response;
             } catch (error) {
                 console.error('Error fetching categories:', error); // tambah ini

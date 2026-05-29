@@ -32,6 +32,14 @@ const sidebarItem: menu[] = [
         'product-management.access'
     ]
   },
+  {
+    title: 'Categories Product',
+    icon: 'custom-support',
+    to: '/category/list',
+    permissions: [
+        'product-management.access'
+    ]
+  },
 
   { header: 'Settings',
     icon: 'custom-setting-2',

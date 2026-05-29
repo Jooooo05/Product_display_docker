@@ -23,7 +23,16 @@ const ProductRoute = [
         meta: {
             permissions: ['product-management.edit']
         }
-    }
+    },
+    // link category
+    {
+        name: 'Category List',
+        path: '/category/list',
+        component: () => import('@/views/pages/categories-product/CategoryList.vue'),
+        meta: {
+            permissions: ['product-management.access']
+        }
+    },
 ];
 
 export default ProductRoute;
