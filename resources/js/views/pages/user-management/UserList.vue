@@ -89,8 +89,14 @@ export default {
     <v-col cols="12" md="12">
       <DataTableCard>
         <template #search>
-          <v-text-field type="text" variant="outlined" persistent-placeholder placeholder="Search 200 records..."
-            v-model="searchValue" density="comfortable" hide-details>
+          <v-text-field 
+          type="text" 
+          variant="outlined" 
+          persistent-placeholder 
+          placeholder="Search 200 records..."
+          v-model="searchValue" 
+          density="comfortable" 
+          hide-details>
             <template v-slot:prepend-inner>
               <SvgSprite name="custom-search" class="text-lightText" style="width: 14px; height: 14px" />
             </template>

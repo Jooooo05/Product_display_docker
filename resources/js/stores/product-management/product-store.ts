@@ -140,7 +140,7 @@ export const useProductStore = defineStore({
             this.search = value;
             if (searchTimeout) clearTimeout(searchTimeout);
             searchTimeout = window.setTimeout(() => {
-                this.fetchProducts();
+                this.fetchProducts(1);
             }, 500);
         },
 

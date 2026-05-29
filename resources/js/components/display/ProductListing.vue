@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, getCurrentInstance, watch } from "vue";
 import { orderBy } from "lodash";
+import ProductSkeletonLoader from "../shared/ProductSkeletonLoader.vue";
 import ProductItem from "./ProductItem.vue";
 import { useProductStore } from "@/stores/product-management/product-store";
 import { useCategoryStore } from "@/stores/category-management/categories-store.js";
@@ -15,15 +16,10 @@ const productStore = useProductStore();
 const categoryStore = useCategoryStore();
 
 // ─── State ────────────────────────────────────────────────────────────────────
-const sortOptions = ["Price: Low to High", "Price: High to Low", "Popularity", "Fresh Arrivals"];
-const selectedSort = ref("Price: Low to High");
 const searchValue = ref("");
 const showFilter = ref(true);
-
 // paginate
 const currentPage = ref(1);
-const perPage = 20;
-const totalItems = ref(0); // nanti diisi dari response API
 
 const filterForm = ref({
     categories: [],
@@ -42,29 +38,6 @@ const applyFilters = async () => {
     currentPage.value = 1;
     await productStore.fetchProducts(1, filterForm.value);
 }
-// ─── Filtering & Sorting ──────────────────────────────────────────────────────
-const filteredProducts = computed(() => {
-    let list = [...productStore.listItems];
-
-    if (selectedSort.value === "Popularity") {
-        list = orderBy(list, ["rating"], ["desc"]);
-    } else if (selectedSort.value === "Price: High to Low") {
-        list = orderBy(list, ["salePrice"], ["desc"]);
-    } else if (selectedSort.value === "Price: Low to High") {
-        list = orderBy(list, ["salePrice"], ["asc"]);
-    } else if (selectedSort.value === "Fresh Arrivals") {
-        list = orderBy(list, ["id"], ["desc"]);
-    }
-
-    const q = searchValue.value.toLowerCase().trim();
-    if (q) {
-        list = list.filter(
-            (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
-        );
-    }
-
-    return list;
-});
 
 const actionItems = [
   { title: 'Edit',   action: 'edit' },
@@ -75,17 +48,21 @@ const actionItems = [
 const handleAction = ({ action, id }: { action: string; id: number | string }) => {
   switch (action) {
     case 'edit':
-      console.log('edit', id)
-      // navigasi atau buka dialog edit
-      router.push(`/product/${id}/edit`)
+      console.log('edit', id);
+      router.push(`/product/${id}/edit`);
       break
     case 'delete':
       console.log('delete', id);
         productStore.deleteProduct(Number(id));
-      // panggil productStore.deleteProduct(id)
       break
   }
 }
+
+// Hapus searchValue biasa, ganti dengan watch
+watch(searchValue, (val) => {
+    productStore.setSearch(val)
+    currentPage.value = 1
+})
 
 // Watch perubahan page → fetch ulang
 watch(currentPage, async (newPage) => {
@@ -93,10 +70,13 @@ watch(currentPage, async (newPage) => {
 });
 
 
+// ProductListing.vue - tambah di script
+const isReady = ref(false)
 onMounted(async () => {
     console.log("ProductListing component mounted");
     await categoryStore.fetchCategories();
     await productStore.fetchProducts(1);
+    isReady.value = true  // flag bahwa initial load sudah selesai
 
     console.log('totalItems:', productStore.totalItems);
     console.log('lastPage:', productStore.lastPage);
@@ -127,9 +107,12 @@ onMounted(async () => {
                         density="compact"
                         hide-details
                         rounded="md"
-                        prepend-inner-icon="mdi-magnify"
-                        style="min-width: 200px; max-width: 240px"
-                    />
+                        style="min-width: 250px; max-width: 280px"
+                    >
+                        <template v-slot:prepend-inner>
+                            <SvgSprite name="custom-search" class="text-lightText" style="width: 14px; height: 14px" />
+                        </template>
+                    </v-text-field>
                 </div>
 
                 <!-- Right: Result count + Slot actions + Sort -->
@@ -137,17 +120,6 @@ onMounted(async () => {
                     <span class="text-caption text-medium-emphasis">
                         {{ productStore.totalItems }} products
                     </span>
-
-                    
-                    <v-select
-                        v-model="selectedSort"
-                        :items="sortOptions"
-                        variant="outlined"
-                        density="compact"
-                        hide-details
-                        rounded="md"
-                        style="min-width: 180px; max-width: 200px"
-                    />
 
                     
 
@@ -182,6 +154,7 @@ onMounted(async () => {
                     closable-chips
                     hide-details
                     class="mb-4"
+                    placeholder="Select category"
                 >
                     <template v-slot:chip="{ props, item }">
                         <v-chip
@@ -239,14 +212,19 @@ onMounted(async () => {
 
         <!-- Product Grid -->
         <div class="flex-grow-1" style="min-width: 0">
+
+            <!-- Product Skeleton Loader -->
+            <ProductSkeletonLoader v-if="!isReady || productStore.loading" :count="6"  />
+
             <transition-group
+                v-else
                 name="fade-list"
                 tag="div"
                 class="product-grid"
                 :class="{ 'grid-wide': !showFilter }"
             >
                 <ProductItem
-                    v-for="product in filteredProducts"
+                    v-for="product in productStore.listItems"
                     :key="product.id"
                     :name="product.name ?? undefined"
                     :image="product.image ?? undefined"
@@ -260,23 +238,21 @@ onMounted(async () => {
             </transition-group>
 
             <!-- Empty State -->
-            <div v-if="filteredProducts.length === 0" class="d-flex flex-column align-center justify-center py-16 ga-2">
+            <div v-if="isReady && !productStore.loading && productStore.listItems.length === 0" class="d-flex flex-column align-center justify-center py-16 ga-2">
                 <v-icon size="52" color="grey-lighten-2">mdi-package-variant-closed</v-icon>
                 <p class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-0">No products found</p>
                 <span class="text-caption text-medium-emphasis">Try adjusting your search or filters.</span>
             </div>
 
+
             <!-- Pagination -->
-            <div v-if="productStore.lastPage > 1" class="d-flex align-center justify-space-between mt-6">
-                <span class="text-caption text-medium-emphasis">
-                    Showing {{ (currentPage - 1) * 20 + 1 }}–{{ Math.min(currentPage * 20, productStore.totalItems) }} of {{ productStore.totalItems }} products
-                </span>
+            <div v-if="productStore.lastPage > 1" class="mt-6 pt-4" style="border-top: 1px solid rgba(0,0,0,0.08);">
                 <v-pagination
                     v-model="currentPage"
                     :length="productStore.lastPage"
-                    :total-visible="5"
+                    :total-visible="4"
                     rounded="md"
-                    color="primary"
+                    color="grey"
                 />
             </div>
         </div>
@@ -285,6 +261,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* Override Vuetify internal pagination alignment */
+:deep(.v-pagination__list) {
+    justify-content: flex-end !important;
+}
+
 /* Sidebar fixed width */
 .filter-sidebar {
     width: 220px;
