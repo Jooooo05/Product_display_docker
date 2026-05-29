@@ -5,8 +5,8 @@ import { useProductStore } from "@/stores/product-management/product-store";
 import { useCategoryStore } from "@/stores/category-management/categories-store";
 const { appContext } = getCurrentInstance()!
 const filters = appContext.config.globalProperties.filters
-
 import BaseBreadcrumb from "@/components/shared/BaseBreadcrumb.vue";
+import SkeletonLoader from "@/components/shared/SkeletonLoader.vue";
 
 
 // ============================================================
@@ -59,7 +59,6 @@ const stockStatusOptions = [
 // ============================================================
 // STATE — Form
 // ============================================================
-const productFormRef = ref(null);
 const formValid = ref(false);
 const isLoading = ref(false);
 
@@ -114,10 +113,6 @@ const removeImage = () => {
     if (fileInputRef.value) fileInputRef.value.value = "";
 };
 
-// ============================================================
-// STATE — Tags Input
-// ============================================================
-const tagInput = ref("");
 
 
 // ============================================================
@@ -197,6 +192,7 @@ const resetForm = () => {
 // ============================================================
 // LIFECYCLE
 // ============================================================
+const isReady = ref(false)
 onMounted(async () => {
     await categoryStore.fetchCategories();
     console.log('Fetched categories:', categoryStore.listItems);
@@ -228,6 +224,8 @@ onMounted(async () => {
             imagePreview.value = `${import.meta.env.VITE_APP_URL}/storage/${product.image}`;
         }
     }
+
+    isReady.value = true // semua fetch selesai, baru tampilkan form
 });
 </script>
 
@@ -236,7 +234,8 @@ onMounted(async () => {
 
     <v-row>
         <v-col cols="12">
-            <v-form ref="productFormRef" v-model="formValid">
+            <SkeletonLoader v-if="!isReady" />
+            <v-form v-else v-model="formValid">
                 <v-row>
                     <!-- ─────────────────────────────────────────────── -->
                     <!-- LEFT COLUMN                                      -->
@@ -691,7 +690,7 @@ onMounted(async () => {
                                     variant="outlined"
                                     rounded="md"
                                     size="large"
-                                    @click="router.push('/ecommerce/product')"
+                                    @click="router.push('/product/list')"
                                     style="flex: 1;"
                                 >
                                     Cancel
