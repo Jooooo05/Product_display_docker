@@ -58,6 +58,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name'           => ['required', 'string', 'min:3', 'max:100'],
             'description'    => ['required', 'string', 'min:10'],
+            'features'       => ['required', 'string', 'min:10'],
+            'specifications' => ['required', 'string', 'min:10'],
             'sku'            => ['nullable', 'string', 'max:50', 'unique:products,sku'],
             'original_price' => ['required', 'integer', 'min:0'],
             'dealer_price'   => ['nullable', 'integer', 'min:0'],
@@ -111,6 +113,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name'           => ['sometimes', 'string', 'min:3', 'max:100'],
             'description'    => ['sometimes', 'string', 'min:10'],
+            'features'       => ['sometimes', 'string', 'min:10'],
+            'specifications' => ['sometimes', 'string', 'min:10'],
             'sku'            => ['nullable', 'string', 'max:50', Rule::unique('products', 'sku')->ignore($product->id)],
             'original_price' => ['sometimes', 'integer', 'min:0'],
             'dealer_price'   => ['nullable', 'integer', 'min:0'],

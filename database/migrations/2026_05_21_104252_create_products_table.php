@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name', 100);
             $table->text('description');
+            $table->text('features');
+            $table->text('specifications');
             $table->string('sku', 50)->nullable()->unique();
             $table->unsignedBigInteger('original_price');
             $table->unsignedBigInteger('dealer_price')->nullable();

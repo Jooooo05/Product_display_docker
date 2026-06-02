@@ -8,6 +8,8 @@ import apiClient from '@/utils/axios';
 interface ProductForm {
     name: string;
     description: string;
+    features: string;
+    specifications: string;
     sku: string;
     original_price: number | null;
     dealer_price: number | null;
@@ -20,6 +22,8 @@ interface ProductItem {
     id: number;
     name: string;
     description: string;
+    features: string;
+    specifications: string;
     sku: string;
     original_price: number;
     dealer_price: number | null;
@@ -74,6 +78,8 @@ export const useProductStore = defineStore({
         form: {
             name: '',
             description: '',
+            features: '',
+            specifications: '',
             sku: '',
             original_price: null,
             dealer_price: null,
@@ -159,6 +165,8 @@ export const useProductStore = defineStore({
                 this.form = {
                     name: product.name,
                     description: product.description,
+                    features: product.features || '',
+                    specifications: product.specifications || '',
                     sku: product.sku || '',
                     original_price: product.original_price,
                     dealer_price: product.dealer_price ?? null,
@@ -311,6 +319,8 @@ export const useProductStore = defineStore({
             this.form = {
                 name: '',
                 description: '',
+                features: '',
+                specifications: '',
                 sku: '',
                 original_price: null,
                 dealer_price: null,

@@ -1,28 +1,17 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 
-type GenealType = {
-  title: string;
-  desc: string;
-};
 
-const generalItem = shallowRef<GenealType[]>([
-  { title: 'Band :', desc: 'Smart Band' },
-  { title: 'Compatible Devices :', desc: 'Smartphones' },
-  { title: 'Ideal For :', desc: 'Unisex' },
-  { title: 'Lifestyle :', desc: 'Fitness | Indoor | Sports | Swimming | Outdoor' },
-  { title: 'Basic Features :', desc: 'Calendar | Date & Time | Timer/Stop Watch' },
-  { title: 'Health Tracker :', desc: 'Heart Rate | Exercise Tracker' }
-]);
 </script>
 
 <template>
-  <v-table>
-    <tr v-for="(gen, i) in generalItem" :key="i">
-      <td class="py-2">
-        <span class="text-h6 text-lightText">{{ gen.title }}</span>
-      </td>
-      <td>{{ gen.desc }}</td>
-    </tr>
-  </v-table>
+    <v-row>
+        <v-col cols="12">
+            <h5 class="text-h5 mb-4">Features</h5>
+            <v-divider></v-divider>
+            <p class="v-col-lg-10 px-0 mb-0 text-h6 text-lightText" style="white-space: pre-line">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum, voluptatem molestias et necessitatibus laboriosam earum doloremque quibusdam libero sunt quaerat quisquam laudantium repellat accusamus dignissimos cupiditate inventore doloribus modi explicabo, vero at possimus? Laudantium voluptatem explicabo quo maiores corrupti. Sint eum doloremque minima, eaque excepturi officia ipsa rem quas cupiditate!
+            </p>
+        </v-col>
+    </v-row>
 </template>

@@ -60,6 +60,8 @@ class ProductSeeder extends Seeder
             $productId = DB::table('products')->insertGetId([
                 'name'           => $product['name'],
                 'description'    => 'Deskripsi lengkap untuk produk ' . $product['name'] . '. Produk berkualitas tinggi dengan garansi resmi.',
+                'features'       => 'Fitur utama untuk ' . $product['name'] . ': Performa tinggi, Desain elegan, Baterai tahan lama.',
+                'specifications' => 'Spesifikasi teknis untuk ' . $product['name'] . ': Prosesor terbaru, RAM besar, Penyimpanan cepat.',
                 'sku'            => 'SKU-' . strtoupper(Str::random(8)),
                 'original_price' => $product['original_price'],
                 'dealer_price'   => $product['dealer_price'],

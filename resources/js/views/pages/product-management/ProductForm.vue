@@ -65,6 +65,8 @@ const isLoading = ref(false);
 const productForm = ref({
     name: "",
     description: "",
+    features: "", 
+    specifications: "",
     originalPrice: null as number | null,
     dealerPrice: null as number | null,
     stockStatus: 'available' as 'available' | 'low_stock' | 'out_of_stock',
@@ -149,6 +151,8 @@ const submitForm = async () => {
         // Mapping balik dari productForm (camelCase) ke store.form (snake_case)
         productStore.form.name = productForm.value.name;
         productStore.form.description = productForm.value.description;
+        productStore.form.features = productForm.value.features;
+        productStore.form.specifications = productForm.value.specifications;
         productStore.form.sku = productForm.value.sku;
         productStore.form.original_price = productForm.value.originalPrice;
         productStore.form.dealer_price = productForm.value.dealerPrice;
@@ -179,6 +183,8 @@ const resetForm = () => {
     productForm.value = {
         name: "",
         description: "",
+        features: "",
+        specifications: "",
         originalPrice: null,
         dealerPrice: null,
         stockStatus: 'available',
@@ -210,6 +216,8 @@ onMounted(async () => {
         productForm.value = {
             name: f.name,
             description: f.description,
+            features: f.features || "",
+            specifications: f.specifications || "",
             sku: f.sku,
             originalPrice: f.original_price,       // <- store pakai snak_case
             dealerPrice: f.dealer_price,          // <- store pakai snak_case
@@ -310,6 +318,35 @@ onMounted(async () => {
                                     counter="500"
                                     class="mb-4"
                                 />
+                                <!-- Baris baru untuk Features dan Specifications (2 kolom) -->
+                                <v-row>
+                                    <v-col cols="12" md="6">
+                                        <v-label class="text-caption font-weight-medium mb-1 d-block">
+                                            Features
+                                        </v-label>
+                                        <v-textarea
+                                            v-model="productForm.features"
+                                            placeholder="e.g., 14-inch Retina display, 8GB RAM, Backlit keyboard"
+                                            variant="outlined"
+                                            color="primary"
+                                            rows="4"
+                                            counter="2000"
+                                        />
+                                    </v-col>
+                                    <v-col cols="12" md="6">
+                                        <v-label class="text-caption font-weight-medium mb-1 d-block">
+                                            Specifications
+                                        </v-label>
+                                        <v-textarea
+                                            v-model="productForm.specifications"
+                                            placeholder="e.g., Processor: M2, Weight: 1.2kg, Battery: 18 hours"
+                                            variant="outlined"
+                                            color="primary"
+                                            rows="4"
+                                            counter="2000"
+                                        />
+                                    </v-col>
+                                </v-row>
 
                                 <!-- SKU -->
                                 <v-label
