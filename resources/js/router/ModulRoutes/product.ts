@@ -24,6 +24,15 @@ const ProductRoute = [
             permissions: ['product-management.edit']
         }
     },
+    {
+        name: 'Product Detail',
+        path: '/product/:id/detail',
+        props: true,
+        component: () => import('@/views/pages/product-management/ProductDetail.vue'),
+        meta: {
+            permissions: ['product-management.access']
+        }
+    },
     // link category
     {
         name: 'Category List',

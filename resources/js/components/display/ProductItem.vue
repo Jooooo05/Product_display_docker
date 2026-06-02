@@ -27,7 +27,7 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
     <v-card variant="outlined" rounded="lg" class="product-card bg-surface overflow-hidden" style="position: relative">
 
         <!-- Image Area -->
-        <router-link :to="`/ecommerce/product/detail/${goto}`" class="image-wrapper d-block">
+        <router-link :to="`/product/${goto}/detail`" class="image-wrapper d-block">
             <img :src="image ? `${appUrl}/storage/${image}` : defaultImage" :alt="name" class="product-image" />
             <div class="image-overlay" />
         </router-link>
@@ -36,7 +36,7 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
 
         <!-- Content -->
         <v-card-item class="pt-3 pb-1">
-            <router-link :to="`/ecommerce/product/detail/${goto}`" class="text-decoration-none">
+            <router-link :to="`/product/${goto}/detail`" class="text-decoration-none">
                 <v-card-title class="text-subtitle-1 font-weight-semibold text-truncate pa-0">
                     {{ name }}
                 </v-card-title>
