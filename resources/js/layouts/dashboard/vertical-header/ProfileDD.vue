@@ -2,8 +2,10 @@
 import { ref } from 'vue';
 import SvgSprite from '@/components/shared/SvgSprite.vue';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const router = useRouter();
 
 const profileItems = ref([
   { title: 'Edit Profile', icon: 'custom-edit' },
@@ -20,15 +22,17 @@ const profileItems = ref([
       </v-avatar>
       <div>
         <h6 class="text-subtitle-1 mb-0">{{ authStore.user?.name || 'No Name' }}</h6>
-        <p class="text-caption text-lightText mb-0">{{ authStore.user?.role || 'No Role' }}</p>
+        <p class="text-caption text-lightText mb-0">
+          {{ authStore.user ? (authStore.user.is_dealer ? 'Dealer' : 'Admin') : 'No Role' }}
+        </p>
       </div>
     </div>
 
     <v-divider></v-divider>
 
-    <!-- List -->
+    <!-- Kalau sudah login -->
+    <template v-if="authStore.token">
       <v-list class="px-2" aria-label="profile list">
-        <!-- Profile Items -->
         <v-list-item
           v-for="(item, index) in profileItems"
           :key="index"
@@ -48,12 +52,7 @@ const profileItems = ref([
         <v-divider class="my-2"></v-divider>
 
         <!-- Logout -->
-        <v-list-item
-          @click="authStore.logout()"
-          color="error"
-          base-color="error"
-          rounded="md"
-        >
+        <v-list-item @click="authStore.logout()" color="error" base-color="error" rounded="md">
           <template v-slot:prepend>
             <div class="me-4">
               <SvgSprite name="custom-logout-1" style="width: 18px; height: 18px" />
@@ -62,5 +61,25 @@ const profileItems = ref([
           <v-list-item-title class="text-h6">Logout</v-list-item-title>
         </v-list-item>
       </v-list>
+    </template>
+
+    <!-- Kalau belum login -->
+    <template v-else>
+      <v-list class="px-2">
+        <v-list-item
+          @click="router.push('/auth/login')"
+          color="primary"
+          base-color="secondary"
+          rounded="md"
+        >
+          <template v-slot:prepend>
+            <div class="me-4">
+              <SvgSprite name="custom-login" style="width: 18px; height: 18px" />
+            </div>
+          </template>
+          <v-list-item-title class="text-h6">Login</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </template>
   </div>
 </template>
