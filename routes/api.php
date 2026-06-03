@@ -20,6 +20,9 @@ use App\Http\Controllers\User\UserController;
 
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/{product}', [ProductController::class, 'show']);
+// categories bisa diakses tanpa auth
+Route::get('categories', [CategoryController::class, 'index']);
+
 
 Route::middleware('throttle:5,1')->group(function () {
     Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
@@ -95,7 +98,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Category Management
     // ─────────────────────────────────────────────
     Route::middleware('can:product-management.access')->group(function () {
-        Route::get('categories', [CategoryController::class, 'index']);
         Route::get('categories/{category}', [CategoryController::class, 'show']);
     });
 

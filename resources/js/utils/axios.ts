@@ -31,7 +31,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
     (config) => {
         const authStore = useAuthStore();
-        const token = authStore.user?.token;
+        const token = authStore.token; // ✅ ambil dari token langsung
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -56,8 +56,14 @@ instance.interceptors.response.use(
 
             if (status === 401 || status === 403) {
                 const authStore = useAuthStore();
-                authStore.logout();
-                router.push({ name: 'Login' });
+                // ✅ Hanya logout kalau bukan dari request logout itu sendiri
+                if (!error.config.url.includes('/auth/logout')) {
+                    authStore.logout();
+                }
+            }
+
+            if (status === 403) {
+                router.push({ name: 'Error 404' });
             }
 
             if (status >= 500) {

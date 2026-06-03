@@ -4,18 +4,13 @@ import SvgSprite from '@/components/shared/SvgSprite.vue';
 import { useCustomizerStore } from '../../../stores/customizer';
 import Logo from '../logo/LogoMain.vue';
 // dropdown imports
-import LanguageDD from '../vertical-header/LanguageDD.vue';
-import DarkModeDD from '../vertical-header/DarkModeDD.vue';
-import NotificationDD from '../vertical-header/NotificationDD.vue';
 import ProfileDD from '../vertical-header/ProfileDD.vue';
-import MegaMenuDD from '../vertical-header/MegaMenuDD.vue';
-import Searchbar from '../vertical-header/SearchBarPanel.vue';
+import DarkModeDD from '../vertical-header/DarkModeDD.vue';
+// import LanguageDD from '../vertical-header/LanguageDD.vue';
+// import NotificationDD from '../vertical-header/NotificationDD.vue';
+// import MegaMenuDD from '../vertical-header/MegaMenuDD.vue';
+// import Searchbar from '../vertical-header/SearchBarPanel.vue';
 
-// assets
-import message1 from '@/assets/images/widget/message/message1.svg';
-import message2 from '@/assets/images/widget/message/message2.svg';
-import message3 from '@/assets/images/widget/message/message3.svg';
-import message4 from '@/assets/images/widget/message/message4.svg';
 
 const messagedrawer = ref(false);
 
@@ -124,7 +119,7 @@ watch(priority, (newPriority) => {
     </v-menu>
   </v-app-bar>
 
-  
+
   <!-- <v-navigation-drawer
     app
     temporary

@@ -1,69 +1,59 @@
 import { defineStore } from 'pinia';
 import { router } from '@/router';
-import axios from '@/utils/axios';
 import apiClient from '@/utils/axios';
 import { useAccessStore } from './user-management/access-store';
+import { User } from '@/types/auth';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    user: null as User | null,
+    token: localStorage.getItem('token'),  // hanya token
     returnUrl: null as string | null,
   }),
   actions: {
     async login(username: string, password: string) {
       const res: any = await apiClient.post('/admin/login', { email: username, password });
 
-      const token = res.access_token;
-      this.user = { token };
+      // Simpan token saja ke localStorage
+      localStorage.setItem('token', res.access_token);
+      this.token = res.access_token;
 
-      const userProfile: any = await apiClient.get('/auth/me');
-      const user = { ...userProfile, token };
+      // Fetch profile dari server
+      await this.fetchProfile();
 
-      this.user = user;
-      localStorage.setItem('user', JSON.stringify(user));
-
-      const accessStore = useAccessStore();
-      const perms: string[] = user.permission_list || [];
-      accessStore.setAccess(perms); // ✅ 1 param
-
-      this.initBroadcasting();
-
-      if (perms.length > 0) {
-        router.push(this.returnUrl || '/dashboard');
+      // ✅ Redirect hanya setelah login
+      if (this.returnUrl) {
+        router.push(this.returnUrl);
+        this.returnUrl = null;
       } else {
-        router.push('/');
+        router.push('/dashboard');
       }
     },
 
     async fetchProfile() {
       try {
-        const userProfile: any = await apiClient.get('/auth/me');
-        const token = this.user?.token;
-        const user = { ...userProfile, token };
+        const userProfile: User = await apiClient.get('/auth/me');
+        console.log('Fetched user profile:', userProfile);
 
-        this.user = user;
-        localStorage.setItem('user', JSON.stringify(user));
+        // ✅ user hanya di Pinia, tidak ke localStorage
+        this.user = userProfile;
 
         const accessStore = useAccessStore();
-        const perms: string[] = user.permission_list || [];
-        accessStore.setAccess(perms); // ✅ 1 param
+        const perms: string[] = userProfile.permission_list || [];
+        accessStore.setAccess(perms);
 
-        // Re-check current route permission
-        const currentRoute = router.currentRoute.value;
-        if (currentRoute.meta.permissions) {
-          const requiredPermissions = currentRoute.meta.permissions as string[];
-          if (!accessStore.hasAnyPermission(requiredPermissions)) {
-            router.push('/pages/error');
-          }
-        }
+        this.initBroadcasting();
+
       } catch (error) {
-        console.error('Failed to refresh profile', error);
+        // Token tidak valid / expired → logout bersih
+        console.error('Failed to fetch profile:', error);
+        await this.logout();
       }
     },
 
     async logout() {
       try {
-        if (window.Echo) {
+        if (window.Echo && this.user?.id) {
           window.Echo.leave(`App.Models.User.${this.user.id}`);
         }
         await apiClient.post('/auth/logout');
@@ -71,10 +61,11 @@ export const useAuthStore = defineStore('auth', {
         console.error('Logout failed:', error);
       } finally {
         this.user = null;
-        localStorage.removeItem('user');
+        this.token = null;
+        localStorage.removeItem('token'); // ✅ hanya hapus token
 
         const accessStore = useAccessStore();
-        accessStore.setAccess([]); // ✅ 1 param, array kosong
+        accessStore.setAccess([]);
 
         router.push('/auth/login');
       }
