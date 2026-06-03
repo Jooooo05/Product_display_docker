@@ -14,7 +14,7 @@ const productId = Number(route.params.id);
     </v-card-text>
   </v-card>
 
-  <v-row>
+  <!-- <v-row>
     <v-col cols="12" >
       <v-card elevation="0" variant="outlined" class="bg-surface" rounded="lg">
         <v-card-text>
@@ -22,5 +22,5 @@ const productId = Number(route.params.id);
         </v-card-text>
       </v-card>
     </v-col>
-  </v-row>
+  </v-row> -->
 </template>
