@@ -64,12 +64,6 @@ watch(priority, (newPriority) => {
       </v-sheet>
     </v-menu>
 
-    <!-- ---------------------------------------------- -->
-    <!-- Search part -->
-    <!-- ---------------------------------------------- -->
-    <v-sheet class="d-none d-lg-block bg-transparent" width="250">
-      <Searchbar />
-    </v-sheet>
 
     <!---/Search part -->
 
@@ -83,26 +77,14 @@ watch(priority, (newPriority) => {
     <!-- ---------------------------------------------- -->
     <v-menu :close-on-content-click="false" offset="10, 320">
       <template v-slot:activator="{ props }">
-        <v-btn
-          icon
-          class="text-secondary hidden-sm-and-down d-lg-block d-none"
-          color="secondary"
-          rounded="sm"
-          variant="text"
-          v-bind="props"
-        >
-          <SvgSprite name="custom-window" />
-        </v-btn>
         <DarkModeDD />
       </template>
-      <v-sheet width="1024" height="325" rounded="md" class="d-lg-block d-none">
-        <MegaMenuDD />
-      </v-sheet>
+
     </v-menu>
     <!-- ---------------------------------------------- -->
     <!-- translate -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" location="bottom" offset="6, 80">
+    <!-- <v-menu :close-on-content-click="false" location="bottom" offset="6, 80">
       <template v-slot:activator="{ props }">
         <v-btn icon class="ms-sm-2 ms-1" color="secondary" rounded="sm" v-bind="props">
           <SvgSprite name="custom-translation" />
@@ -111,19 +93,19 @@ watch(priority, (newPriority) => {
       <v-sheet rounded="md" width="200">
         <LanguageDD />
       </v-sheet>
-    </v-menu>
+    </v-menu> -->
 
     <!-- ---------------------------------------------- -->
     <!-- Notification -->
     <!-- ---------------------------------------------- -->
-    <NotificationDD />
+    <!-- <NotificationDD /> -->
 
     <!-- ---------------------------------------------- -->
     <!-- Message -->
     <!-- ---------------------------------------------- -->
-    <v-btn icon class="ms-sm-2 ms-1" color="secondary" rounded="sm" @click.stop="messagedrawer = !messagedrawer">
+    <!-- <v-btn icon class="ms-sm-2 ms-1" color="secondary" rounded="sm" @click.stop="messagedrawer = !messagedrawer">
       <SvgSprite name="custom-message-note" />
-    </v-btn>
+    </v-btn> -->
 
     <!-- ---------------------------------------------- -->
     <!-- User Profile -->
@@ -141,7 +123,9 @@ watch(priority, (newPriority) => {
       </v-sheet>
     </v-menu>
   </v-app-bar>
-  <v-navigation-drawer
+
+  
+  <!-- <v-navigation-drawer
     app
     temporary
     elevation="24"
@@ -226,5 +210,5 @@ watch(priority, (newPriority) => {
         </v-list-item>
       </v-list>
     </perfect-scrollbar>
-  </v-navigation-drawer>
+  </v-navigation-drawer> -->
 </template>
