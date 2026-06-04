@@ -5,9 +5,9 @@ import ProductSkeletonLoader from "../shared/ProductSkeletonLoader.vue";
 import ProductItem from "./ProductItem.vue";
 import { useProductStore } from "@/stores/product-management/product-store";
 import { useCategoryStore } from "@/stores/category-management/categories-store.js";
-import { useRouter } from 'vue-router';
-const { appContext } = getCurrentInstance()!
-const filters = appContext.config.globalProperties.filters
+import { useRouter } from "vue-router";
+const { appContext } = getCurrentInstance()!;
+const filters = appContext.config.globalProperties.filters;
 
 const router = useRouter();
 
@@ -25,61 +25,65 @@ const filterForm = ref({
     categories: [],
     priceMin: null as number | null,
     priceMax: null as number | null,
-})
+});
 
 const onPriceInput = (field: "priceMin" | "priceMax", event: Event) => {
     const input = event.target as HTMLInputElement;
     const raw = input.value.replace(/[^0-9]/g, "");
     filterForm.value[field] = raw === "" ? null : Number(raw);
-}
+};
 
 // function applyFilters sementara
 const applyFilters = async () => {
     currentPage.value = 1;
     await productStore.fetchProducts(1, filterForm.value);
-}
+};
 
 const actionItems = [
-  { title: 'Edit',   action: 'edit' },
-  { title: 'Delete', action: 'delete', color: 'error' },
-]
+    { title: "Edit", action: "edit" },
+    { title: "Delete", action: "delete", color: "error" },
+];
 
-
-const handleAction = ({ action, id }: { action: string; id: number | string }) => {
-  switch (action) {
-    case 'edit':
-      console.log('edit', id);
-      router.push(`/product/${id}/edit`);
-      break
-    case 'delete':
-      console.log('delete', id);
-        productStore.deleteProduct(Number(id));
-      break
-  }
-}
+const handleAction = ({
+    action,
+    id,
+}: {
+    action: string;
+    id: number | string;
+}) => {
+    switch (action) {
+        case "edit":
+            console.log("edit", id);
+            router.push(`/product/${id}/edit`);
+            break;
+        case "delete":
+            console.log("delete", id);
+            productStore.deleteProduct(Number(id));
+            break;
+    }
+};
 
 // Hapus searchValue biasa, ganti dengan watch
 watch(searchValue, (val) => {
-    productStore.setSearch(val)
-    currentPage.value = 1
-})
+    productStore.setSearch(val);
+    currentPage.value = 1;
+});
 
 // Watch perubahan page → fetch ulang
 watch(currentPage, async (newPage) => {
     await productStore.fetchProducts(newPage, filterForm.value);
 });
 
-
 // ProductListing.vue - tambah di script
-const isReady = ref(false)
+const isReady = ref(false);
 onMounted(async () => {
     console.log("ProductListing component mounted");
     await categoryStore.fetchCategories();
     await productStore.fetchProducts(1);
-    isReady.value = true  // flag bahwa initial load sudah selesai
+    isReady.value = true; // flag bahwa initial load sudah selesai
 
-    console.log('totalItems:', productStore.totalItems);
-    console.log('lastPage:', productStore.lastPage);
+    console.log("totalItems:", productStore.totalItems);
+    console.log("lastPage:", productStore.lastPage);
 });
 </script>
 
@@ -87,8 +91,9 @@ onMounted(async () => {
     <!-- ── Toolbar ──────────────────────────────────────────────── -->
     <v-card variant="outlined" rounded="lg" class="mb-5 px-2">
         <v-card-text class="py-2">
-            <div class="d-flex align-center justify-space-between flex-wrap ga-2">
-
+            <div
+                class="d-flex align-center justify-space-between flex-wrap ga-2"
+            >
                 <!-- Left: Filter toggle + Search -->
                 <div class="d-flex align-center ga-2 flex-wrap">
                     <v-btn
@@ -97,7 +102,11 @@ onMounted(async () => {
                         color="default"
                         @click="showFilter = !showFilter"
                     >
-                        <SvgSprite name="custom-filter" style="width: 16px; height: 16px" /> filter
+                        <SvgSprite
+                            name="custom-filter"
+                            style="width: 16px; height: 16px"
+                        />
+                        filter
                     </v-btn>
 
                     <v-text-field
@@ -110,7 +119,11 @@ onMounted(async () => {
                         style="min-width: 250px; max-width: 280px"
                     >
                         <template v-slot:prepend-inner>
-                            <SvgSprite name="custom-search" class="text-lightText" style="width: 14px; height: 14px" />
+                            <SvgSprite
+                                name="custom-search"
+                                class="text-lightText"
+                                style="width: 14px; height: 14px"
+                            />
                         </template>
                     </v-text-field>
                 </div>
@@ -121,25 +134,29 @@ onMounted(async () => {
                         {{ productStore.totalItems }} products
                     </span>
 
-                    
-
                     <!-- Slot actions opsional (e.g. tombol Create Product) -->
                     <slot name="actions" />
                 </div>
-
             </div>
         </v-card-text>
     </v-card>
 
     <!-- ── Body ─────────────────────────────────────────────────── -->
     <div class="d-flex align-start ga-4">
-
         <!-- Sidebar Filter -->
-        <v-card v-if="showFilter" variant="outlined" rounded="lg" class="filter-sidebar flex-shrink-0">
+        <v-card
+            v-if="showFilter"
+            variant="outlined"
+            rounded="lg"
+            class="filter-sidebar flex-shrink-0"
+        >
             <v-card-text>
-
                 <!-- Category -->
-                <p class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1">Category</p>
+                <p
+                    class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1"
+                >
+                    Category
+                </p>
 
                 <v-autocomplete
                     v-model="filterForm.categories"
@@ -170,11 +187,17 @@ onMounted(async () => {
 
                 <v-divider class="my-4" />
                 <!-- Price Range -->
-                <p class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1">Price Range</p>
+                <p
+                    class="text-caption font-weight-bold text-uppercase text-medium-emphasis mb-1"
+                >
+                    Price Range
+                </p>
                 <v-row>
                     <v-col cols="12">
                         <v-text-field
-                            :model-value="filters.formatNumber(filterForm.priceMin)"
+                            :model-value="
+                                filters.formatNumber(filterForm.priceMin)
+                            "
                             @input="onPriceInput('priceMin', $event)"
                             placeholder="Min"
                             variant="outlined"
@@ -186,7 +209,9 @@ onMounted(async () => {
                     </v-col>
                     <v-col cols="12">
                         <v-text-field
-                            :model-value="filters.formatNumber(filterForm.priceMax)"
+                            :model-value="
+                                filters.formatNumber(filterForm.priceMax)
+                            "
                             @input="onPriceInput('priceMax', $event)"
                             placeholder="Max"
                             variant="outlined"
@@ -198,13 +223,9 @@ onMounted(async () => {
                     </v-col>
                 </v-row>
 
-
                 <v-divider class="my-4" />
                 <!-- Button Submit -->
-                <v-btn 
-                    color="primary" 
-                    block 
-                    @click="applyFilters">
+                <v-btn color="primary" block @click="applyFilters">
                     Apply Filters
                 </v-btn>
             </v-card-text>
@@ -212,9 +233,11 @@ onMounted(async () => {
 
         <!-- Product Grid -->
         <div class="flex-grow-1" style="min-width: 0">
-
             <!-- Product Skeleton Loader -->
-            <ProductSkeletonLoader v-if="!isReady || productStore.loading" :count="6"  />
+            <ProductSkeletonLoader
+                v-if="!isReady || productStore.loading"
+                :count="6"
+            />
 
             <transition-group
                 v-else
@@ -238,15 +261,33 @@ onMounted(async () => {
             </transition-group>
 
             <!-- Empty State -->
-            <div v-if="isReady && !productStore.loading && productStore.listItems.length === 0" class="d-flex flex-column align-center justify-center py-16 ga-2">
-                <v-icon size="52" color="grey-lighten-2">mdi-package-variant-closed</v-icon>
-                <p class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-0">No products found</p>
-                <span class="text-caption text-medium-emphasis">Try adjusting your search or filters.</span>
+            <div
+                v-if="
+                    isReady &&
+                    !productStore.loading &&
+                    productStore.listItems.length === 0
+                "
+                class="d-flex flex-column align-center justify-center py-16 ga-2"
+            >
+                <v-icon size="52" color="grey-lighten-2"
+                    >mdi-package-variant-closed</v-icon
+                >
+                <p
+                    class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-0"
+                >
+                    No products found
+                </p>
+                <span class="text-caption text-medium-emphasis"
+                    >Try adjusting your search or filters.</span
+                >
             </div>
 
-
             <!-- Pagination -->
-            <div v-if="productStore.lastPage > 1" class="mt-6 pt-4" style="border-top: 1px solid rgba(0,0,0,0.08);">
+            <div
+                v-if="productStore.lastPage > 1"
+                class="mt-6 pt-4"
+                style="border-top: 1px solid rgba(0, 0, 0, 0.08)"
+            >
                 <v-pagination
                     v-model="currentPage"
                     :length="productStore.lastPage"
@@ -256,7 +297,6 @@ onMounted(async () => {
                 />
             </div>
         </div>
-
     </div>
 </template>
 
@@ -285,7 +325,9 @@ onMounted(async () => {
 /* Transition animasi tetap */
 .fade-list-enter-active,
 .fade-list-leave-active {
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 .fade-list-enter-from,
 .fade-list-leave-to {
