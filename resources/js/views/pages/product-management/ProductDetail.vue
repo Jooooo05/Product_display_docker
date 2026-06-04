@@ -10,7 +10,7 @@ const productId = Number(route.params.id);
 <template>
   <v-card elevation="0" variant="outlined" rounded="lg" class="bg-surface mt-2 mb-6">
     <v-card-text>
-      <ProductDetail :id="productId" />
+      <ProductDetail :id="productId" mode="admin" />
     </v-card-text>
   </v-card>
 

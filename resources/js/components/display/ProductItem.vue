@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
+
 import { getCurrentInstance } from "vue"
 const { appContext } = getCurrentInstance()!
 const filters = appContext.config.globalProperties.filters
@@ -13,9 +14,10 @@ const props = defineProps<{
     originalPrice?: number
     dealerPrice?: number
     goto?: number | string
-    // ✅ Tambah ini
     actions?: { title: string; action: string; color?: string }[]
 }>();
+
+const authStore = useAuthStore();
 
 // Gambar default, bisa pakai dari assets lokal atau URL online
 const defaultImage = '/assets/images/placeholder_image.jpg';
@@ -27,7 +29,11 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
     <v-card variant="outlined" rounded="lg" class="product-card bg-surface overflow-hidden" style="position: relative">
 
         <!-- Image Area -->
-        <router-link :to="`/product/${goto}/detail`" class="image-wrapper d-block">
+        <router-link :to="`/product/${goto}/detail`" v-if="authStore.token && authStore.user && !authStore.user?.is_dealer" class="image-wrapper d-block">
+            <img :src="image ? `${appUrl}/storage/${image}` : defaultImage" :alt="name" class="product-image" />
+            <div class="image-overlay" />
+        </router-link>
+        <router-link :to="`/product/detail/public/${goto}`" v-else class="image-wrapper d-block">
             <img :src="image ? `${appUrl}/storage/${image}` : defaultImage" :alt="name" class="product-image" />
             <div class="image-overlay" />
         </router-link>
@@ -36,7 +42,12 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
 
         <!-- Content -->
         <v-card-item class="pt-3 pb-1">
-            <router-link :to="`/product/${goto}/detail`" class="text-decoration-none">
+            <router-link :to="`/product/${goto}/detail`" v-if="authStore.token && authStore.user && !authStore.user?.is_dealer" class="text-decoration-none">
+                <v-card-title class="text-subtitle-1 font-weight-semibold text-truncate pa-0">
+                    {{ name }}
+                </v-card-title>
+            </router-link>
+            <router-link :to="`/product/detail/public/${goto}`" v-else class="text-decoration-none">
                 <v-card-title class="text-subtitle-1 font-weight-semibold text-truncate pa-0">
                     {{ name }}
                 </v-card-title>
@@ -54,7 +65,7 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
         </v-card-text>
 
         <!-- ✅ Tambah blok ini -->
-        <template v-if="actions?.length">
+        <template v-if="actions?.length && authStore.token && authStore.user && !authStore.user.is_dealer">
             <v-menu location="bottom end">
                 <template #activator="{ props: menuProps }">
                     <v-btn

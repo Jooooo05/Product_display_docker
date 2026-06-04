@@ -3,6 +3,7 @@ import MainRoutes from "./MainRoutes";
 import AuthRoutes from "./AuthRoutes";
 import { useAuthStore } from "@/stores/auth";
 import { useUIStore } from "@/stores/ui";
+import { useAccessStore } from "@/stores/user-management/access-store";
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -18,6 +19,12 @@ export const router = createRouter({
             component: () =>
                 import("@/views/pages/maintenance/error/Error404Page.vue"),
         },
+        {
+            name: "Product Detail Public",
+            path: "/product/detail/public/:id",
+            props: true,
+            component: () => import("@/views/ProductDetailPage.vue"),
+        }
     ],
 });
 
@@ -52,6 +59,14 @@ router.beforeEach(async (to, from, next) => {
       return next('/'); // dealer tidak boleh masuk /main
     }
 
+    // ✅ Cek permission per route
+    if (to.meta.permissions) {
+        const accessStore = useAccessStore();
+        const requiredPermissions = to.meta.permissions as string[];
+        if (!accessStore.hasAnyPermission(requiredPermissions)) {
+            return next('/pages/error');
+        }
+    }
 
     next();
 });
