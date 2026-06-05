@@ -59,12 +59,12 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
 
             <!-- Price -->
             <div class="d-flex align-center ga-2">
-                <span class="text-subtitle-1 font-weight-bold">{{ filters.formatMoney(dealerPrice) }}</span>
-                <span class="text-caption text-medium-emphasis text-decoration-line-through">{{ filters.formatMoney(originalPrice, false, false, 0) }}</span>
+                <span v-if="authStore.token && authStore.user && authStore.user?.is_dealer" class="text-subtitle-1 font-weight-bold">Rp {{ filters.formatMoney(dealerPrice) }}</span>
+                <span class="text-caption font-weight-bold text-medium-emphasis " :class="{ 'text-decoration-line-through': authStore.token && authStore.user && !authStore.user.is_dealer }">Rp {{ filters.formatMoney(originalPrice, false, false, 0) }}</span>
             </div>
         </v-card-text>
 
-        <!-- ✅ Tambah blok ini -->
+        <!-- Tambah blok ini -->
         <template v-if="actions?.length && authStore.token && authStore.user && !authStore.user.is_dealer">
             <v-menu location="bottom end">
                 <template #activator="{ props: menuProps }">
