@@ -292,6 +292,8 @@ export const useProductStore = defineStore({
 
             fd.append('name', this.form.name);
             fd.append('description', this.form.description);
+            fd.append('features', this.form.features);
+            fd.append('specifications', this.form.specifications);
             fd.append('sku', this.form.sku);
             fd.append('original_price', String(this.form.original_price ?? ''));
             fd.append('dealer_price', String(this.form.dealer_price ?? ''));

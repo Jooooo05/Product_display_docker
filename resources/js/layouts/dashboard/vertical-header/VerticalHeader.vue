@@ -17,8 +17,8 @@ import DarkModeDD from './DarkModeDD.vue';
 import NotificationDD from './NotificationDD.vue';
 import ProfileDD from './ProfileDD.vue';
 import MegaMenuDD from './MegaMenuDD.vue';
-import Searchbar from './SearchBarPanel.vue';
-import type { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+// import Searchbar from './SearchBarPanel.vue';
+// import type { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
 const customizer = useCustomizerStore();
 const priority = ref(customizer.isHorizontalLayout ? 0 : 0);
@@ -134,14 +134,6 @@ const toggleMobileSidebar = () => {
       </v-sheet>
     </v-menu>
 
-    <!-- ---------------------------------------------- -->
-    <!-- Search part -->
-    <!-- ---------------------------------------------- -->
-    <v-sheet color="transparent" class="d-none d-lg-block" width="224">
-      <Searchbar />
-    </v-sheet>
-
-    <!---/Search part -->
 
     <v-spacer />
     <!-- ---------------------------------------------- -->
