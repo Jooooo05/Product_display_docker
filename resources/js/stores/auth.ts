@@ -67,7 +67,7 @@ export const useAuthStore = defineStore('auth', {
         const accessStore = useAccessStore();
         accessStore.setAccess([]);
 
-        router.push('/auth/login');
+        router.push('/');
       }
     },
 
