@@ -50,7 +50,7 @@ router.beforeEach(async (to, from, next) => {
     // Route butuh auth tapi belum login → ke halaman login
     if (!auth.user) {
         auth.returnUrl = to.fullPath;
-        return next("/auth/login");
+        return next("/admin/login");
     }
 
     // Cek requiresSuperAdmin → hanya yang bukan dealer

@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->enum('status', ['Active', 'Inactive', 'Draft'])->default('Active');
             $table->enum('stock_status', ['available', 'low_stock', 'out_of_stock'])->default('available');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('edited_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

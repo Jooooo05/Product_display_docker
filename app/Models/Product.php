@@ -22,6 +22,8 @@ class Product extends Model
         'image',
         'status',
         'stock_status',
+        'created_by',
+        'edited_by',
     ];
 
     protected $casts = [
@@ -77,5 +79,15 @@ class Product extends Model
     public function scopeAvailable($query)
     {
         return $query->where('stock_status', 'available');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function editedBy()
+    {
+        return $this->belongsTo(User::class, 'edited_by');
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -80,6 +81,9 @@ class ProductController extends Controller
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
+        $validated['created_by'] = Auth::id();
+        $validated['edited_by'] = Auth::id();
+
         $product = Product::create($validated);
 
         // Sync categories (create if not exists)
@@ -132,6 +136,7 @@ class ProductController extends Controller
             }
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
+        $validated['edited_by'] = Auth::id();
 
         $product->update($validated);
 

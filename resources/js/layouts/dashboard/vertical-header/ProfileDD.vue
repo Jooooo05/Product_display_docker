@@ -8,8 +8,8 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const profileItems = ref([
-  { title: 'Edit Profile', icon: 'custom-edit' },
-  { title: 'Customer Service', icon: 'custom-support' },
+  // { title: 'Edit Profile', icon: 'custom-edit' },
+  // { title: 'Customer Service', icon: 'custom-support' },
 ]);
 </script>
 
@@ -28,7 +28,7 @@ const profileItems = ref([
       </div>
     </div>
 
-    <v-divider></v-divider>
+    <!-- <v-divider></v-divider> -->
 
     <!-- Kalau sudah login -->
     <template v-if="authStore.token">

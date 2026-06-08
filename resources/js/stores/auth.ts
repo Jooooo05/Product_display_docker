@@ -9,6 +9,9 @@ export const useAuthStore = defineStore('auth', {
     user: null as User | null,
     token: localStorage.getItem('token'),  // hanya token
     returnUrl: null as string | null,
+
+    // loading universal
+    isLoadingUniversal: false,
   }),
   actions: {
     async loginDealer(username: string, password: string) {

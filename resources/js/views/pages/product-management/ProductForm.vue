@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import { useProductStore } from "@/stores/product-management/product-store";
 import { useCategoryStore } from "@/stores/category-management/categories-store";
 const { appContext } = getCurrentInstance()!
 const filters = appContext.config.globalProperties.filters
 import BaseBreadcrumb from "@/components/shared/BaseBreadcrumb.vue";
 import SkeletonLoader from "@/components/shared/SkeletonLoader.vue";
+import Swal from "sweetalert2";
 
 
 // ============================================================
@@ -144,7 +146,7 @@ const rules = {
 // ============================================================
 const submitForm = async () => {
     isLoading.value = true;
-
+    useAuthStore().isLoadingUniversal = true; // Aktifkan loading universal
     console.log("Submitting form with data:", productForm.value);
 
     try {
@@ -169,11 +171,23 @@ const submitForm = async () => {
             await productStore.createProduct();
             resetForm();
         }
+        useAuthStore().isLoadingUniversal = false; // Matikan loading universal
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: `Product has been ${isEditMode.value ? 'updated' : 'created'} successfully.`,
+        });
 
-    } catch (err) {
+    } catch (err : any) {
         // Error sudah di-handle di store (productStore.error)
         // Bisa tambah snackbar/alert di sini kalau mau
+        useAuthStore().isLoadingUniversal = false; // Matikan loading universal
         console.error("Failed to submit form:", err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Submission Failed',
+            text: err.message || 'An error occurred while submitting the form.',
+        });
     } finally {
         isLoading.value = false;
     }
@@ -239,7 +253,6 @@ onMounted(async () => {
 
 <template>
     <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs" />
-
     <v-row>
         <v-col cols="12">
             <SkeletonLoader v-if="!isReady" />
