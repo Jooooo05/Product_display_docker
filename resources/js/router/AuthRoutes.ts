@@ -11,9 +11,14 @@ const AuthRoutes = {
     //   component: () => import('@/views/StarterPage.vue')
     // },
     {
-      name: 'Login',
-      path: '/auth/login',
+      name: 'Login Dealer',
+      path: '/dealer/login',
       component: () => import('@/views/authentication/auth1/LoginPage1.vue')
+    },
+    {
+      name: 'Login Admin',
+      path: '/admin/login',
+      component: () => import('@/views/authentication/authAdmin/LoginAdminPage.vue')
     },
     {
       name: 'Register',

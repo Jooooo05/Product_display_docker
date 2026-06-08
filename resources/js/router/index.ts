@@ -36,7 +36,7 @@ router.beforeEach(async (to, from, next) => {
 
     // Kalau ada token tapi user belum di-fetch → fetch dulu
     if (auth.token && !auth.user) {
-        await auth.fetchProfile();
+        await auth.fetchAdminProfile();
     }
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);

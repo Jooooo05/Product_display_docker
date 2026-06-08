@@ -7,8 +7,8 @@ import { Form } from 'vee-validate';
 const checkbox = ref(false);
 const valid = ref(false);
 const show1 = ref(false);
-const password = ref('');
-const username = ref('');
+const password = ref('password');
+const username = ref('test@example.com');
 const passwordRules = ref([
   (v: string) => !!v || 'Password is required',
   (v: string) => (v && v.length <= 10) || 'Password must be less than 10 characters'
@@ -24,7 +24,7 @@ const snackbar = ref({
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function validate(values: any, { setErrors }: any) {
   const authStore = useAuthStore();
-  return authStore.loginDealer(username.value, password.value).catch((error) => {
+  return authStore.loginAdmin(username.value, password.value).catch((error) => {
       console.error('Login error:', error);
       const errorMessage = error.message || 'Login failed. Please check your connection or credentials.';
       snackbar.value = {
@@ -50,7 +50,7 @@ function validate(values: any, { setErrors }: any) {
     </div>
   </v-snackbar>
   <div class="d-flex justify-space-between align-center mt-4">
-    <h3 class="text-h3 text-center mb-0">Login Dealer</h3>
+    <h3 class="text-h3 text-center mb-0">Login Admin</h3>
     <!-- <router-link to="/auth/register" class="text-primary text-decoration-none">Don't Have an account?</router-link> -->
   </div>
   <Form @submit="validate" class="mt-7 loginForm" v-slot="{ errors, isSubmitting }">

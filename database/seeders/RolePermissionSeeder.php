@@ -35,6 +35,7 @@ class RolePermissionSeeder extends Seeder
             ],
             'product-management' => [
                 'access',
+                'read',
                 'create',
                 'edit',
                 'delete',
@@ -119,6 +120,12 @@ class RolePermissionSeeder extends Seeder
             'name' => 'dealer',
             'guard_name' => $guardName,
         ]);
+
+        // Tambahkan ini, sesuaikan permission sesuai kebutuhan dealer
+        $dealerPermissions = [
+            'product-management.read',
+        ];
+        $dealerRole->syncPermissions($dealerPermissions);
 
         // 5. Sync Permissions ke Role
         // Admin dapat semua permission yang ada di daftar

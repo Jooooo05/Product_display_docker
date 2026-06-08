@@ -67,7 +67,7 @@ const profileItems = ref([
     <template v-else>
       <v-list class="px-2">
         <v-list-item
-          @click="router.push('/auth/login')"
+          @click="router.push('/dealer/login')"
           color="primary"
           base-color="secondary"
           rounded="md"

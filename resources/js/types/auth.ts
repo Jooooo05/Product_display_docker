@@ -7,5 +7,5 @@ export interface User {
   address: string | null;
   status: string;
   is_dealer: boolean;
-  permission_list: string[];
+  permission_list?: string[];
 }

@@ -11,7 +11,25 @@ export const useAuthStore = defineStore('auth', {
     returnUrl: null as string | null,
   }),
   actions: {
-    async login(username: string, password: string) {
+    async loginDealer(username: string, password: string) {
+      const res: any = await apiClient.post('/dealer/login', { email: username, password });
+
+      // Simpan token saja ke localStorage
+      localStorage.setItem('token', res.access_token);
+      this.token = res.access_token;
+
+      // Fetch profile dari server
+      await this.fetchDealerProfile();
+
+      // ✅ Redirect hanya setelah login
+      if (this.returnUrl) {
+        router.push(this.returnUrl);
+        this.returnUrl = null;
+      } else {
+        router.push('/');
+      }
+    },
+    async loginAdmin(username: string, password: string) {
       const res: any = await apiClient.post('/admin/login', { email: username, password });
 
       // Simpan token saja ke localStorage
@@ -19,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
       this.token = res.access_token;
 
       // Fetch profile dari server
-      await this.fetchProfile();
+      await this.fetchAdminProfile();
 
       // ✅ Redirect hanya setelah login
       if (this.returnUrl) {
@@ -30,10 +48,31 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async fetchProfile() {
+    async fetchAdminProfile() {
       try {
         const userProfile: User = await apiClient.get('/auth/me');
         console.log('Fetched user profile:', userProfile);
+
+        // ✅ user hanya di Pinia, tidak ke localStorage
+        this.user = userProfile;
+
+        const accessStore = useAccessStore();
+        const perms: string[] = userProfile.permission_list || [];
+        accessStore.setAccess(perms);
+
+        this.initBroadcasting();
+
+      } catch (error) {
+        // Token tidak valid / expired → logout bersih
+        console.error('Failed to fetch profile:', error);
+        await this.logout();
+      }
+    },
+
+    async fetchDealerProfile() {
+      try {
+        const userProfile: User = await apiClient.get('/dealer/me');
+        console.log('Fetched dealer profile:', userProfile);
 
         // ✅ user hanya di Pinia, tidak ke localStorage
         this.user = userProfile;
@@ -76,7 +115,7 @@ export const useAuthStore = defineStore('auth', {
 
       window.Echo.private(`App.Models.User.${this.user.id}`)
         .listen('.UserUpdated', () => {
-          this.fetchProfile();
+          this.fetchAdminProfile();
         });
     }
   }

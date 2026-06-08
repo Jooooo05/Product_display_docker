@@ -218,6 +218,9 @@ class UserController extends Controller
             // We no longer use $user->assignRole($role) here.
             // Spatie Roles are now decoupled from users to prevent permission inheritance.
             // Roles only act as UI templates. Authorization relies 100% on Direct Permissions.
+            if (!empty($role)) {
+                $user->assignRole($role);
+            }
 
             if (!empty($permissions)) {
                 $user->syncPermissions($permissions);
@@ -257,12 +260,9 @@ class UserController extends Controller
 
         $user->update($data);
 
-        if ($role) {
-            // [RBAC REFACTOR]
-            // Don't sync Spatie role to avoid inheriting permissions.
-            // We sync an empty array to ensure no Spatie roles are attached
-            // (useful for migrating existing users to this new logic).
-            $user->syncRoles([]);
+        // Sync role — kalau role berubah, yang lama otomatis diganti
+        if (!empty($role)) {
+            $user->syncRoles([$role]);
         }
 
         // [RBAC REFACTOR]
