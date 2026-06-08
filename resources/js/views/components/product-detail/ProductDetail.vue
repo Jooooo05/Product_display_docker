@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useProductStore } from "@/stores/product-management/product-store.js";
 import ProductTab from "./ProductTab.vue";
+import { useAuthStore } from "@/stores/auth.js";
 
 const props = defineProps({
     id: {
@@ -13,6 +14,10 @@ const props = defineProps({
         default: 'admin', // 'admin' | 'public'
     }
 });
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => !!authStore.token && !!authStore.user);
+const isDealer = computed(() => isLoggedIn.value && !!authStore.user?.is_dealer);
+const isAdmin = computed(() => isLoggedIn.value && !authStore.user?.is_dealer);
 
 const store = useProductStore();
 const appUrl = import.meta.env.VITE_APP_URL;
@@ -131,9 +136,9 @@ onMounted(async () => {
 
                 <!-- Price block -->
                 <div class="d-flex align-center gap-3 mb-5">
-                    <span class="text-h5 font-weight-medium">{{ formatPrice(product.dealer_price) }}</span>
-                    <span class="text-body-2 text-medium-emphasis text-decoration-line-through">{{ formatPrice(product.original_price) }}</span>
-                    <v-chip v-if="discountPercent" color="error" variant="tonal" size="x-small">
+                    <span v-if="isDealer" class="text-h5 font-weight-medium mr-3">{{ formatPrice(product.dealer_price) }}</span>
+                    <span class="text-caption font-weight-bold text-medium-emphasis mr-2" :class="{ 'text-decoration-line-through': isDealer }" >{{ formatPrice(product.original_price) }}</span>
+                    <v-chip v-if="discountPercent && isDealer" color="error" variant="tonal" size="x-small">
                         -{{ discountPercent }}%
                     </v-chip>
                 </div>

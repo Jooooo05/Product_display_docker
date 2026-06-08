@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/auth";
 
-import { getCurrentInstance } from "vue"
+import { computed, getCurrentInstance } from "vue"
 const { appContext } = getCurrentInstance()!
 const filters = appContext.config.globalProperties.filters
 
@@ -19,6 +19,10 @@ const props = defineProps<{
 
 const authStore = useAuthStore();
 
+const isLoggedIn = computed(() => !!authStore.token && !!authStore.user);
+const isDealer = computed(() => isLoggedIn.value && !!authStore.user?.is_dealer);
+const isAdmin = computed(() => isLoggedIn.value && !authStore.user?.is_dealer);
+
 // Gambar default, bisa pakai dari assets lokal atau URL online
 const defaultImage = '/assets/images/placeholder_image.jpg';
 
@@ -29,7 +33,7 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
     <v-card variant="outlined" rounded="lg" class="product-card bg-surface overflow-hidden" style="position: relative">
 
         <!-- Image Area -->
-        <router-link :to="`/product/${goto}/detail`" v-if="authStore.token && authStore.user && !authStore.user?.is_dealer" class="image-wrapper d-block">
+        <router-link :to="`/product/${goto}/detail`" v-if="isAdmin" class="image-wrapper d-block">
             <img :src="image ? `${appUrl}/storage/${image}` : defaultImage" :alt="name" class="product-image" />
             <div class="image-overlay" />
         </router-link>
@@ -42,7 +46,7 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
 
         <!-- Content -->
         <v-card-item class="pt-3 pb-1">
-            <router-link :to="`/product/${goto}/detail`" v-if="authStore.token && authStore.user && !authStore.user?.is_dealer" class="text-decoration-none">
+            <router-link :to="`/product/${goto}/detail`" v-if="isAdmin" class="text-decoration-none">
                 <v-card-title class="text-subtitle-1 font-weight-semibold text-truncate pa-0">
                     {{ name }}
                 </v-card-title>
@@ -59,13 +63,15 @@ const emit = defineEmits<{(e: 'action', payload: { action: string; id: number | 
 
             <!-- Price -->
             <div class="d-flex align-center ga-2">
-                <span v-if="authStore.token && authStore.user && authStore.user?.is_dealer" class="text-subtitle-1 font-weight-bold">Rp {{ filters.formatMoney(dealerPrice) }}</span>
-                <span class="text-caption font-weight-bold text-medium-emphasis " :class="{ 'text-decoration-line-through': authStore.token && authStore.user && !authStore.user.is_dealer }">Rp {{ filters.formatMoney(originalPrice, false, false, 0) }}</span>
+                <span v-if="isDealer" class="text-subtitle-1 font-weight-bold"> {{ filters.formatMoney(dealerPrice) }}</span>
+                <span class="text-caption font-weight-bold text-medium-emphasis" :class="{ 'text-decoration-line-through': isDealer }">
+                    Rp {{ filters.formatMoney(originalPrice, false, false, 0) }}
+                </span>
             </div>
         </v-card-text>
 
         <!-- Tambah blok ini -->
-        <template v-if="actions?.length && authStore.token && authStore.user && !authStore.user.is_dealer">
+        <template v-if="actions?.length && isAdmin">
             <v-menu location="bottom end">
                 <template #activator="{ props: menuProps }">
                     <v-btn

@@ -84,7 +84,7 @@ class AuthController extends Controller
     public function dealer(Request $request)
     {
         $user = $request->user();
-
+        // return true;
         return response()->json([
             'id'              => $user->id,
             'name'            => $user->name,

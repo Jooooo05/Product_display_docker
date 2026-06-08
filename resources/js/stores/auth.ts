@@ -71,6 +71,7 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchDealerProfile() {
       try {
+        console.log('user', this.user);
         const userProfile: User = await apiClient.get('/dealer/me');
         console.log('Fetched dealer profile:', userProfile);
 
