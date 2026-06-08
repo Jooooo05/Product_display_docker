@@ -143,7 +143,7 @@ const toggleMobileSidebar = () => {
     <!-- ---------------------------------------------- -->
     <!-- Messages -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" offset="10, 380">
+    <!-- <v-menu :close-on-content-click="false" offset="10, 380">
       <template v-slot:activator="{ props }">
         <v-btn
           icon
@@ -160,12 +160,12 @@ const toggleMobileSidebar = () => {
       <v-sheet width="1024" height="325" rounded="md" class="d-lg-block d-none">
         <MegaMenuDD />
       </v-sheet>
-    </v-menu>
+    </v-menu> -->
     <DarkModeDD />
     <!-- ---------------------------------------------- -->
     <!-- translate -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" location="bottom" offset="6, 80">
+    <!-- <v-menu :close-on-content-click="false" location="bottom" offset="6, 80">
       <template v-slot:activator="{ props }">
         <v-btn icon class="ms-sm-2 ms-1" color="secondary" aria-label="language button" rounded="sm" v-bind="props">
           <SvgSprite name="custom-translation" />
@@ -174,17 +174,17 @@ const toggleMobileSidebar = () => {
       <v-sheet rounded="md" width="200">
         <LanguageDD />
       </v-sheet>
-    </v-menu>
+    </v-menu> -->
 
     <!-- ---------------------------------------------- -->
     <!-- Notification -->
     <!-- ---------------------------------------------- -->
-    <NotificationDD />
+    <!-- <NotificationDD /> -->
 
     <!-- ---------------------------------------------- -->
     <!-- Message -->
     <!-- ---------------------------------------------- -->
-    <v-btn
+    <!-- <v-btn
       icon
       class="ms-sm-2 ms-1"
       aria-label="message button"
@@ -193,7 +193,7 @@ const toggleMobileSidebar = () => {
       @click.stop="messagedrawer = !messagedrawer"
     >
       <SvgSprite name="custom-message-note" />
-    </v-btn>
+    </v-btn> -->
 
     <!-- ---------------------------------------------- -->
     <!-- User Profile -->
@@ -212,7 +212,7 @@ const toggleMobileSidebar = () => {
     </v-menu>
   </v-app-bar>
 
-  <v-navigation-drawer
+  <!-- <v-navigation-drawer
     app
     temporary
     elevation="24"
@@ -297,5 +297,5 @@ const toggleMobileSidebar = () => {
         </v-list-item>
       </v-list>
     </perfect-scrollbar>
-  </v-navigation-drawer>
+  </v-navigation-drawer> -->
 </template>

@@ -542,12 +542,7 @@ onMounted(async () => {
                                     @dragleave="isDragging = false"
                                     @drop.prevent="onDrop"
                                 >
-                                    <v-icon
-                                        size="36"
-                                        color="grey-lighten-1"
-                                        class="mb-2"
-                                        >mdi-cloud-upload-outline</v-icon
-                                    >
+                                    <SvgSprite name="custom-image" style="width: 36px; height: 36px" class="mb-3 text-secondary" />
                                     <p
                                         class="text-body-2 font-weight-medium mb-1"
                                     >
