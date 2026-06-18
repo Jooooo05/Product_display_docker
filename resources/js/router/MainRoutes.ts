@@ -14,8 +14,8 @@ const MainRoutes = {
     {
       name: 'Starter',
       path: '/dashboard',
-      component: () => import('@/views/StarterPage.vue'),
-      // component: () => import('@/views/pages/dashboard/DefaultDashboard.vue'),
+      // component: () => import('@/views/StarterPage.vue'),
+      component: () => import('@/views/pages/dashboard/DefaultDashboard.vue'),
     },
     ...UserRoute,
     ...RoleRoute,

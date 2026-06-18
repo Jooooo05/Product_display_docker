@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// assets
 </script>
 
 <template>
@@ -8,12 +7,13 @@
       <v-row>
         <v-col cols="12" xl="6" md="7" sm="10">
           <div class="pb-md-8 pt-md-7 pt-5 pb-6">
-            <h2 class="text-sm-h2 text-h3">Welcome to Dashboard Display Products</h2>
+            <h2 class="text-sm-h2 text-h3">Welcome to Product Dashboard</h2>
             <p class="text-h6 mb-7">
-              The Brand new User Interface with power of Material-UI Components. Explore the Endless possibilities with Able Pro.
+              Monitor and manage your product catalog, stock status, and categories in one place.
             </p>
           </div>
         </v-col>
+        
         <v-col cols="12" xl="6" md="5" class="d-md-block d-none">
           <div class="pe-8">
             <v-img src="/assets/images/analytics/welcome-banner.png" cover class="ms-auto" width="200" alt="welcome banner" />
@@ -23,6 +23,7 @@
     </v-card-text>
   </v-card>
 </template>
+
 <style lang="scss">
 .welcomeBanner {
   background: rgb(var(--v-theme-darkprimary));

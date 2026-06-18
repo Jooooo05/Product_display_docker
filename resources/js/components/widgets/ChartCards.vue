@@ -1,244 +1,205 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useTheme } from "vuetify";
-import SvgSprite from "@/components/shared/SvgSprite.vue";
+import { computed } from 'vue';
+import SvgSprite from '@/components/shared/SvgSprite.vue';
+import { useDashboardStore } from '@/stores/dashboard/dashboard-store'; 
 
-const theme = useTheme();
-const menulist = ref(["Today", "Weekly", "Monthly"]);
+const store = useDashboardStore();
 
-// ─── Factory ──────────────────────────────────────────────────────────────────
-const makeChartOptions = (colorKey: string) => computed(() => {
-    const color = theme.current.value.colors[colorKey];
-    return {
-        chart: {
-            type: "bar",
-            height: 50,
-            fontFamily: "inherit",
-            sparkline: { enabled: true },
-        },
-        dataLabels: { enabled: false },
-        plotOptions: {
-            bar: { borderRadius: 2, columnWidth: "80%" },
-        },
-        colors: [color + "99"],
-        stroke: { curve: "smooth", width: 0 },
-        tooltip: {
-            fixed: { enabled: false },
-            x: { show: false },
-        },
-    };
-});
-
-const chartOptions1 = makeChartOptions("primary");
-const chartOptions2 = makeChartOptions("warning");
-const chartOptions3 = makeChartOptions("success");
-const chartOptions4 = makeChartOptions("error");
-
-// ─── Series ───────────────────────────────────────────────────────────────────
-const seriesData = [10, 30, 40, 20, 60, 50, 20, 15, 20, 25, 30, 25];
-
-const barChart1 = { series: [{ name: "Users", data: seriesData }] };
-const barChart2 = { series: [{ name: "Users", data: seriesData }] };
-const barChart3 = { series: [{ name: "Users", data: seriesData }] };
-const barChart4 = { series: [{ name: "Users", data: seriesData }] };
+const totalProducts   = computed(() => store.totalProductCount);
+const totalCategories = computed(() => store.totalCategoryCount);
+const totalUsers      = computed(() => store.totalUserCount);
+const byStatus        = computed(() => store.productsByStatus);
+const byStock         = computed(() => store.productsByStock);
+const usersByRole     = computed(() => store.usersByRole);
+const alertCount      = computed(() => store.alertProductCount);
+const loading         = computed(() => store.loadingStats);
 </script>
 
 <template>
     <v-row class="mb-0">
-        <!-- chart 1 -->
+
+        <!-- ── Card 1: Total Products ── -->
         <v-col cols="12" md="6" lg="3">
             <v-card variant="outlined" elevation="0" class="bg-surface" rounded="lg">
-                <v-card-text>
-                    <v-list class="py-0" aria-busy="true" aria-label="chart content">
-                        <v-list-item class="pa-0">
-                            <template v-slot:prepend>
-                                <v-avatar variant="tonal" color="primary" rounded="md">
-                                    <SvgSprite name="custom-wallet-outline" style="width: 20px; height: 20px" />
-                                </v-avatar>
-                            </template>
-                            <h6 class="text-subtitle-1 mb-0">All Earnings</h6>
-                            <template v-slot:append>
-                                <v-menu width="150" location="start">
-                                    <template v-slot:activator="{ props }">
-                                        <v-btn icon color="secondary" aria-label="menu" variant="text" rounded="md" size="small" v-bind="props">
-                                            <SvgSprite name="custom-more-outline" style="width: 20px; height: 20px; transform: rotate(90deg)" />
-                                        </v-btn>
-                                    </template>
-                                    <v-list elevation="24" aria-label="menu" aria-busy="true" class="pa-3" rounded="md">
-                                        <v-list-item density="compact" rounded="md" color="secondary" v-for="(item, index) in menulist" :key="index" :value="index">
-                                            <v-list-item-title class="text-h6 text-lightText">{{ item }}</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-menu>
-                            </template>
-                        </v-list-item>
-                    </v-list>
-                    <v-sheet class="pa-6 pb-3 mt-3" color="containerBg" rounded="lg">
-                        <v-row class="widget-grid">
-                            <v-col cols="7">
-                                <apexchart type="bar" height="50" :options="chartOptions1" :series="barChart1.series" />
-                            </v-col>
-                            <v-col cols="5">
-                                <h5 class="text-h5">$3200</h5>
-                                <p class="text-body-1 text-primary mb-0">
-                                    <SvgSprite name="custom-rise-outline" style="width: 16px; height: 16px; transform: rotate(45deg)" />
-                                    30.6%
-                                </p>
-                            </v-col>
-                        </v-row>
-                    </v-sheet>
+                <!-- Header -->
+                <v-card-text class="d-flex align-center justify-space-between py-3 px-5">
+                    <div class="d-flex align-center gap-2">
+                        <v-avatar variant="tonal" color="primary" rounded="md" size="36">
+                            <SvgSprite name="custom-wallet-outline" style="width: 18px; height: 18px" />
+                        </v-avatar>
+                        <span class="ml-2 text-subtitle-2 font-weight-medium">Total Products</span>
+                    </div>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Big Number -->
+                <v-card-text class="py-6 text-center">
+                    <v-skeleton-loader v-if="loading" type="heading" class="mx-auto" width="80" />
+                    <h1 v-else class="font-weight-bold text-primary" style="font-size: 3.5rem; line-height: 1">
+                        {{ totalProducts }}
+                    </h1>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Chips -->
+                <v-card-text class="py-3 px-5 d-flex align-center justify-center flex-wrap">
+                    <v-skeleton-loader v-if="loading" type="chip" />
+                    <template v-else>
+                        <v-chip class="mr-2" size="small" color="success" variant="tonal" rounded="md">
+                            {{ byStatus.active }} Active
+                        </v-chip>
+                        <v-chip class="mr-2" size="small" color="warning" variant="tonal" rounded="md">
+                            {{ byStatus.draft }} Draft
+                        </v-chip>
+                        <v-chip class="mr-2" size="small" color="error" variant="tonal" rounded="md">
+                            {{ byStatus.inactive }} Inactive
+                        </v-chip>
+                    </template>
                 </v-card-text>
             </v-card>
         </v-col>
 
-        <!-- chart 2 -->
+        <!-- ── Card 2: Total Categories ── -->
         <v-col cols="12" md="6" lg="3">
             <v-card variant="outlined" elevation="0" class="bg-surface" rounded="lg">
-                <v-card-text>
-                    <v-list class="py-0" aria-busy="true" aria-label="chart content">
-                        <v-list-item class="pa-0">
-                            <template v-slot:prepend>
-                                <v-avatar variant="tonal" color="warning" rounded="md">
-                                    <SvgSprite name="custom-page-outline" style="width: 20px; height: 20px" />
-                                </v-avatar>
-                            </template>
-                            <h6 class="text-subtitle-1 mb-0">Page Views</h6>
-                            <template v-slot:append>
-                                <v-menu width="150" location="start">
-                                    <template v-slot:activator="{ props }">
-                                        <v-btn icon color="secondary" aria-label="menu" variant="text" rounded="md" size="small" v-bind="props">
-                                            <SvgSprite name="custom-more-outline" style="width: 20px; height: 20px; transform: rotate(90deg)" />
-                                        </v-btn>
-                                    </template>
-                                    <v-list elevation="24" aria-label="menu" aria-busy="true" class="pa-3" rounded="md">
-                                        <v-list-item density="compact" rounded="md" color="secondary" v-for="(item, index) in menulist" :key="index" :value="index">
-                                            <v-list-item-title class="text-h6 text-lightText">{{ item }}</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-menu>
-                            </template>
-                        </v-list-item>
-                    </v-list>
-                    <v-sheet class="pa-6 pb-3 mt-3" color="containerBg" rounded="lg">
-                        <v-row class="widget-grid">
-                            <v-col cols="7">
-                                <apexchart type="bar" height="50" :options="chartOptions2" :series="barChart2.series" />
-                            </v-col>
-                            <v-col cols="5">
-                                <h5 class="text-h5">290+</h5>
-                                <p class="text-body-1 text-warning mb-0">
-                                    <SvgSprite name="custom-fall-outline" style="width: 16px; height: 16px; transform: rotate(45deg)" />
-                                    30.6%
-                                </p>
-                            </v-col>
-                        </v-row>
-                    </v-sheet>
+                <!-- Header -->
+                <v-card-text class="d-flex align-center justify-space-between py-3 px-5">
+                    <div class="d-flex align-center gap-2">
+                        <v-avatar variant="tonal" color="success" rounded="md" size="36">
+                            <SvgSprite name="custom-calendar-outline" style="width: 18px; height: 18px" />
+                        </v-avatar>
+                        <span class="ml-2 text-subtitle-2 font-weight-medium">Total Categories</span>
+                    </div>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Big Number -->
+                <v-card-text class="py-6 text-center">
+                    <v-skeleton-loader v-if="loading" type="heading" class="mx-auto" width="80" />
+                    <h1 v-else class="font-weight-bold text-success" style="font-size: 3.5rem; line-height: 1">
+                        {{ totalCategories }}
+                    </h1>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Chips -->
+                <v-card-text class="py-3 px-5 d-flex align-center justify-center gap-2 flex-wrap">
+                    <v-skeleton-loader v-if="loading" type="chip" />
+                    <v-chip v-else size="small" color="success" variant="tonal" rounded="md">
+                        Categories available
+                    </v-chip>
                 </v-card-text>
             </v-card>
         </v-col>
 
-        <!-- chart 3 -->
+        <!-- ── Card 3: Total Users ── -->
         <v-col cols="12" md="6" lg="3">
             <v-card variant="outlined" elevation="0" class="bg-surface" rounded="lg">
-                <v-card-text>
-                    <v-list class="py-0" aria-busy="true" aria-label="chart content">
-                        <v-list-item class="pa-0">
-                            <template v-slot:prepend>
-                                <v-avatar variant="tonal" color="success" rounded="md">
-                                    <SvgSprite name="custom-calendar-outline" style="width: 20px; height: 20px" />
-                                </v-avatar>
-                            </template>
-                            <h6 class="text-subtitle-1 mb-0">Total task</h6>
-                            <template v-slot:append>
-                                <v-menu width="150" location="start">
-                                    <template v-slot:activator="{ props }">
-                                        <v-btn icon color="secondary" aria-label="menu" variant="text" rounded="md" size="small" v-bind="props">
-                                            <SvgSprite name="custom-more-outline" style="width: 20px; height: 20px; transform: rotate(90deg)" />
-                                        </v-btn>
-                                    </template>
-                                    <v-list elevation="24" aria-label="menu" aria-busy="true" class="pa-3" rounded="md">
-                                        <v-list-item density="compact" rounded="md" color="secondary" v-for="(item, index) in menulist" :key="index" :value="index">
-                                            <v-list-item-title class="text-h6 text-lightText">{{ item }}</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-menu>
-                            </template>
-                        </v-list-item>
-                    </v-list>
-                    <v-sheet class="pa-6 pb-3 mt-3" color="containerBg" rounded="lg">
-                        <v-row class="widget-grid">
-                            <v-col cols="7">
-                                <apexchart type="bar" height="50" :options="chartOptions3" :series="barChart3.series" />
-                            </v-col>
-                            <v-col cols="5">
-                                <h5 class="text-h5">1468</h5>
-                                <p class="text-body-1 text-success mb-0">
-                                    <SvgSprite name="custom-rise-outline" style="width: 16px; height: 16px; transform: rotate(45deg)" />
-                                    30.6%
-                                </p>
-                            </v-col>
-                        </v-row>
-                    </v-sheet>
+                <!-- Header -->
+                <v-card-text class="d-flex align-center justify-space-between py-3 px-5">
+                    <div class="d-flex align-center gap-2">
+                        <v-avatar variant="tonal" color="warning" rounded="md" size="36">
+                            <SvgSprite name="custom-user-fill" style="width: 18px; height: 18px" />
+                        </v-avatar>
+                        <span class="ml-2 text-subtitle-2 font-weight-medium">Total Users</span>
+                    </div>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Big Number -->
+                <v-card-text class="py-6 text-center">
+                    <v-skeleton-loader v-if="loading" type="heading" class="mx-auto" width="80" />
+                    <h1 v-else class="font-weight-bold text-warning" style="font-size: 3.5rem; line-height: 1">
+                        {{ totalUsers }}
+                    </h1>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Chips — dynamic per role -->
+                <v-card-text class="py-3 px-5 d-flex align-center justify-center gap-2 flex-wrap">
+                    <v-skeleton-loader v-if="loading" type="chip" />
+                    <template v-else>
+                        <v-chip
+                            v-for="([role, count]) in Object.entries(usersByRole)"
+                            :key="role"
+                            size="small"
+                            color="warning"
+                            variant="tonal"
+                            rounded="md"
+                            class="mr-2 text-capitalize"
+                        >
+                            {{ count }} {{ role }}
+                        </v-chip>
+                        <v-chip v-if="!Object.keys(usersByRole).length" class="mr-2" size="small" color="warning" variant="tonal" rounded="md">
+                            No roles assigned
+                        </v-chip>
+                    </template>
                 </v-card-text>
             </v-card>
         </v-col>
 
-        <!-- chart 4 -->
+        <!-- ── Card 4: Stock Status ── -->
         <v-col cols="12" md="6" lg="3">
             <v-card variant="outlined" elevation="0" class="bg-surface" rounded="lg">
-                <v-card-text>
-                    <v-list class="py-0" aria-busy="true" aria-label="chart content">
-                        <v-list-item class="pa-0">
-                            <template v-slot:prepend>
-                                <v-avatar variant="tonal" color="error" rounded="md">
-                                    <SvgSprite name="custom-cloud-outline-1" style="width: 20px; height: 20px" />
-                                </v-avatar>
-                            </template>
-                            <h6 class="text-subtitle-1 mb-0">Download</h6>
-                            <template v-slot:append>
-                                <v-menu width="150" location="start">
-                                    <template v-slot:activator="{ props }">
-                                        <v-btn icon color="secondary" aria-label="menu" variant="text" rounded="md" size="small" v-bind="props">
-                                            <SvgSprite name="custom-more-outline" style="width: 20px; height: 20px; transform: rotate(90deg)" />
-                                        </v-btn>
-                                    </template>
-                                    <v-list elevation="24" aria-label="menu" aria-busy="true" class="pa-3" rounded="md">
-                                        <v-list-item density="compact" rounded="md" color="secondary" v-for="(item, index) in menulist" :key="index" :value="index">
-                                            <v-list-item-title class="text-h6 text-lightText">{{ item }}</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-menu>
-                            </template>
-                        </v-list-item>
-                    </v-list>
-                    <v-sheet class="pa-6 pb-3 mt-3" color="containerBg" rounded="lg">
-                        <v-row class="widget-grid">
-                            <v-col cols="7">
-                                <apexchart type="bar" height="50" :options="chartOptions4" :series="barChart4.series" />
-                            </v-col>
-                            <v-col cols="5">
-                                <h5 class="text-h5">$300</h5>
-                                <p class="text-body-1 text-error mb-0">
-                                    <SvgSprite name="custom-fall-outline" style="width: 16px; height: 16px; transform: rotate(130deg)" />
-                                    30.6%
-                                </p>
-                            </v-col>
-                        </v-row>
-                    </v-sheet>
+                <!-- Header -->
+                <v-card-text class="d-flex align-center justify-space-between py-3 px-5">
+                    <div class="d-flex align-center gap-2">
+                        <v-avatar variant="tonal" :color="alertCount > 0 ? 'error' : 'success'" rounded="md" size="36">
+                            <SvgSprite name="custom-cloud-outline-1" style="width: 18px; height: 18px" />
+                        </v-avatar>
+                        <span class="ml-2 text-subtitle-2 font-weight-medium">Stock Alert</span>
+                    </div>
+                    <v-chip
+                        v-if="!loading"
+                        size="x-small"
+                        :color="alertCount > 0 ? 'error' : 'success'"
+                        variant="flat"
+                        rounded="md"
+                    >
+                        {{ alertCount > 0 ? 'Need Attention' : 'All Good' }}
+                    </v-chip>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Big Number -->
+                <v-card-text class="py-6 text-center">
+                    <v-skeleton-loader v-if="loading" type="heading" class="mx-auto" width="80" />
+                    <h1
+                        v-else
+                        class="font-weight-bold"
+                        :class="alertCount > 0 ? 'text-error' : 'text-success'"
+                        style="font-size: 3.5rem; line-height: 1"
+                    >
+                        {{ alertCount }}
+                    </h1>
+                </v-card-text>
+
+                <v-divider />
+
+                <!-- Chips -->
+                <v-card-text class="py-3 px-5 d-flex align-center justify-center gap-2 flex-wrap">
+                    <v-skeleton-loader v-if="loading" type="chip" />
+                    <template v-else>
+                        <v-chip class="mr-2" size="small" color="success" variant="tonal" rounded="md">
+                            {{ byStock.available }} Available
+                        </v-chip>
+                        <v-chip class="mr-2" size="small" color="warning" variant="tonal" rounded="md">
+                            {{ byStock.low_stock }} Low
+                        </v-chip>
+                        <v-chip class="mr-2" size="small" color="error" variant="tonal" rounded="md">
+                            {{ byStock.out_of_stock }} Out
+                        </v-chip>
+                    </template>
                 </v-card-text>
             </v-card>
         </v-col>
+
     </v-row>
 </template>
-
-<style lang="scss">
-.widget-grid {
-    > div {
-        @media (max-width: 1540px) and (min-width: 1280px) {
-            flex: 0 0 100%;
-            max-width: 100%;
-            text-align: center;
-        }
-    }
-}
-</style>
