@@ -119,8 +119,10 @@ export const useDashboardStore = defineStore({
             try {
                 // apiClient interceptor return response.data langsung
                 // → response = { products: {...}, categories: {...}, users: {...} }
+                console.log('Fetching dashboard stats...');
                 const response: any = await apiClient.get('/dashboard');
                 this.stats = response;
+                console.log('Dashboard stats fetched:', this.stats);
             } catch (err: any) {
                 this.error = err?.message || 'Failed to load dashboard stats';
             } finally {
@@ -136,6 +138,7 @@ export const useDashboardStore = defineStore({
             this.loadingProducts = true;
             this.error = null;
             try {
+                console.log(`Fetching products for page ${page} with filters:`, this.filters);
                 const params = new URLSearchParams();
                 params.set('page', String(page));
                 params.set('per_page', '5');
