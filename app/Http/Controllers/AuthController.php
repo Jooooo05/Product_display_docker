@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -20,10 +21,15 @@ class AuthController extends Controller
         }
 
         $user  = Auth::user();
-        if (!$user->hasRole('Super Admin')) {
+
+        // Ambil semua role yang bukan 'dealer'
+        $adminRoles = Role::where('name', '!=', 'dealer')->pluck('name')->toArray();
+        
+        if (!$user->hasAnyRole($adminRoles)) {
             Auth::logout();
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+        
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
