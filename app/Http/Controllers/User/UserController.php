@@ -260,9 +260,12 @@ class UserController extends Controller
 
         $user->update($data);
 
-        // Sync role — kalau role berubah, yang lama otomatis diganti
-        if (!empty($role)) {
-            $user->syncRoles([$role]);
+        if ($role) {
+            // [RBAC REFACTOR]
+            // Don't sync Spatie role to avoid inheriting permissions.
+            // We sync an empty array to ensure no Spatie roles are attached
+            // (useful for migrating existing users to this new logic).
+            $user->syncRoles([]);
         }
 
         // [RBAC REFACTOR]

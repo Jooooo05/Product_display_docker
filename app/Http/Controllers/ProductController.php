@@ -61,7 +61,7 @@ class ProductController extends Controller
             'description'    => ['required', 'string', 'min:10'],
             'features'       => ['required', 'string', 'min:10'],
             'specifications' => ['required', 'string', 'min:10'],
-            'sku'            => ['nullable', 'string', 'max:50', 'unique:products,sku'],
+            'sku'            => ['required', 'string', 'max:50', 'unique:products,sku'],
             'original_price' => ['required', 'integer', 'min:0'],
             'dealer_price'   => ['nullable', 'integer', 'min:0'],
             'status'         => ['sometimes', Rule::in(['Active', 'Inactive', 'Draft'])],
@@ -72,9 +72,9 @@ class ProductController extends Controller
         ]);
 
         // Auto-generate SKU if not provided
-        if (empty($validated['sku'])) {
-            $validated['sku'] = $this->generateSku($validated['name']);
-        }
+        // if (empty($validated['sku'])) {
+        //     $validated['sku'] = $this->generateSku($validated['name']);
+        // }
 
         // Handle image upload
         if ($request->hasFile('image')) {

@@ -63,7 +63,7 @@ const stockStatusOptions = [
 // ============================================================
 const formValid = ref(false);
 const isLoading = ref(false);
-
+const formRef = ref<any>(null)
 const productForm = ref({
     name: "",
     description: "",
@@ -133,7 +133,7 @@ const onPriceInput = (field: "originalPrice" | "dealerPrice", event: Event) => {
 // VALIDATION RULES
 // ============================================================
 const rules = {
-    required: (v: any) => !!v || "Field is required",
+    required: (v: any) => (v !== null && v !== undefined && String(v).trim() !== '') || "Field is required",
     minLength: (min: number) => (v: string) =>
         (v && v.length >= min) || `Minimum ${min} characters`,
     maxLength: (max: number) => (v: string) =>
@@ -145,6 +145,17 @@ const rules = {
 // FUNCTIONS — Submit & Reset
 // ============================================================
 const submitForm = async () => {
+    // Trigger validasi semua field sekaligus
+    const { valid } = await formRef.value.validate()
+
+    if (!valid) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please fill in all required fields correctly.',
+        });
+        return;
+    }
     isLoading.value = true;
     useAuthStore().isLoadingUniversal = true; // Aktifkan loading universal
     console.log("Submitting form with data:", productForm.value);
@@ -256,7 +267,7 @@ onMounted(async () => {
     <v-row>
         <v-col cols="12">
             <SkeletonLoader v-if="!isReady" />
-            <v-form v-else v-model="formValid">
+            <v-form ref="formRef" v-else v-model="formValid">
                 <v-row>
                     <!-- ─────────────────────────────────────────────── -->
                     <!-- LEFT COLUMN                                      -->
@@ -336,6 +347,7 @@ onMounted(async () => {
                                     <v-col cols="12" md="6">
                                         <v-label class="text-caption font-weight-medium mb-1 d-block">
                                             Features
+                                            <span class="text-error">*</span>
                                         </v-label>
                                         <v-textarea
                                             v-model="productForm.features"
@@ -344,11 +356,16 @@ onMounted(async () => {
                                             color="primary"
                                             rows="4"
                                             counter="2000"
+                                            :rules="[
+                                                rules.required,
+                                                rules.minLength(10),
+                                            ]"
                                         />
                                     </v-col>
                                     <v-col cols="12" md="6">
                                         <v-label class="text-caption font-weight-medium mb-1 d-block">
                                             Specifications
+                                            <span class="text-error">*</span>
                                         </v-label>
                                         <v-textarea
                                             v-model="productForm.specifications"
@@ -357,24 +374,29 @@ onMounted(async () => {
                                             color="primary"
                                             rows="4"
                                             counter="2000"
+                                            :rules="[
+                                                rules.required,
+                                                rules.minLength(10),
+                                            ]"
                                         />
                                     </v-col>
                                 </v-row>
 
                                 <!-- SKU -->
-                                <v-label
-                                    class="text-caption font-weight-medium mb-1 d-block"
-                                    >SKU</v-label
-                                >
+                                <v-label class="text-caption font-weight-medium mb-1 d-block">
+                                    SKU
+                                    <span class="text-error">*</span>
+                                </v-label>
                                 <v-text-field
                                     v-model="productForm.sku"
                                     placeholder="e.g., SKU-001-ABC"
                                     variant="outlined"
                                     density="comfortable"
                                     color="primary"
-                                    :rules="[rules.maxLength(50)]"
-                                    hint="Leave blank to auto-generate"
-                                    persistent-hint
+                                    :rules="[
+                                        rules.required,
+                                        rules.maxLength(50)
+                                    ]"
                                 />
                             </v-card-text>
                         </v-card>
@@ -412,7 +434,7 @@ onMounted(async () => {
                                         <v-label
                                             class="text-caption font-weight-medium mb-1 d-block"
                                         >
-                                            Original Price
+                                            User Price
                                             <span class="text-error">*</span>
                                         </v-label>
                                         <v-text-field
@@ -434,10 +456,10 @@ onMounted(async () => {
 
                                     <!-- Dealer Price -->
                                     <v-col cols="12" sm="6">
-                                        <v-label
-                                            class="text-caption font-weight-medium mb-1 d-block"
-                                            >Dealer Price</v-label
-                                        >
+                                        <v-label class="text-caption font-weight-medium mb-1 d-block">
+                                            Dealer Price
+                                            <span class="text-error">*</span>
+                                        </v-label>
                                         <v-text-field
                                             :model-value="
                                                 filters.formatNumber(
@@ -752,7 +774,7 @@ onMounted(async () => {
 <style scoped>
 /* Dropzone */
 .dropzone {
-    border: 2px dashed rgba(0, 0, 0, 0.15);
+    border: 2px dashed rgba(var(--v-border-color), 0.3);
     border-radius: 12px;
     padding: 32px 16px;
     display: flex;
@@ -760,11 +782,10 @@ onMounted(async () => {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition:
-        border-color 0.2s,
-        background 0.2s;
+    transition: border-color 0.2s, background 0.2s;
     text-align: center;
-    background: #fafafa;
+    border-color: rgb(var(--v-theme-surface-variant));
+    background: rgba(var(--v-theme-surface-variant), 0.04);
 }
 
 .dropzone:hover,
