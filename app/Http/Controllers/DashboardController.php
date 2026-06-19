@@ -41,6 +41,24 @@ class DashboardController extends Controller
             ->countBy()
             ->toArray();
 
+        // ─── Most Viewed Products (top 5) ────────────────────────────────────
+        $mostViewed = Product::with('categories:id,name')
+            ->orderByDesc('view_count')
+            ->limit(5)
+            ->get()
+            ->map(fn($product) => [
+                'id'         => $product->id,
+                'name'       => $product->name,
+                'sku'        => $product->sku,
+                'image_url'  => $product->image_url,
+                'view_count' => $product->view_count,
+                'status'     => $product->status,
+                'categories' => $product->categories->map(fn($c) => [
+                    'id'   => $c->id,
+                    'name' => $c->name,
+                ]),
+            ]);
+
         // ─── Response ────────────────────────────────────────────────────────
         return response()->json([
             'products' => [
@@ -55,6 +73,7 @@ class DashboardController extends Controller
                     'low_stock'    => $productsByStockStatus['low_stock']    ?? 0,
                     'out_of_stock' => $productsByStockStatus['out_of_stock'] ?? 0,
                 ],
+                'most_viewed' => $mostViewed,
             ],
             'categories' => [
                 'total' => $totalCategories,

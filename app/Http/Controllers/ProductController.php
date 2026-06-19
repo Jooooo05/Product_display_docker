@@ -105,6 +105,10 @@ class ProductController extends Controller
     public function show($id): JsonResponse
     {
         $product = Product::with('categories')->findOrFail($id);
+
+        // Increment view count — throttled by IP (30 menit)
+        $product->incrementView();
+        
         return response()->json($product);
     }
 

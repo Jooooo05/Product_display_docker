@@ -21,6 +21,7 @@ class Product extends Model
         'dealer_price',
         'image',
         'status',
+        'view_count',
         'stock_status',
         'created_by',
         'edited_by',

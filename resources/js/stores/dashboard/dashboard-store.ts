@@ -17,11 +17,22 @@ interface StockStatus {
     out_of_stock: number;
 }
 
+interface MostViewedProduct {
+    id: number;
+    name: string;
+    sku: string | null;
+    image_url: string | null;
+    view_count: number;
+    status: 'Active' | 'Inactive' | 'Draft';
+    categories: { id: number; name: string }[];
+}
+
 interface DashboardStats {
     products: {
         total: number;
         by_status: ProductStatus;
         by_stock: StockStatus;
+        most_viewed: MostViewedProduct[];
     };
     categories: {
         total: number;
@@ -96,6 +107,7 @@ export const useDashboardStore = defineStore({
         productsByStatus: (state) => state.stats?.products.by_status ?? { active: 0, inactive: 0, draft: 0 },
         productsByStock:  (state) => state.stats?.products.by_stock  ?? { available: 0, low_stock: 0, out_of_stock: 0 },
         usersByRole:      (state) => state.stats?.users.by_role ?? {},
+        mostViewedProducts: (state) => state.stats?.products.most_viewed    ?? [],
 
         alertProductCount: (state) => {
             const stock = state.stats?.products.by_stock;
