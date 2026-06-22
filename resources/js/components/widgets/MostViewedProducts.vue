@@ -26,7 +26,7 @@ const statusColor: Record<string, string> = {
                 </v-avatar>
                 <span class="text-subtitle-1 font-weight-medium">Most Viewed Products</span>
             </div>
-            <v-chip size="small" color="primary" variant="tonal" rounded="md">Top 5</v-chip>
+            <v-chip size="small" color="primary" variant="tonal" rounded="md">6</v-chip>
         </v-card-text>
 
         <v-divider />

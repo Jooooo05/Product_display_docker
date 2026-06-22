@@ -44,7 +44,7 @@ class DashboardController extends Controller
         // ─── Most Viewed Products (top 5) ────────────────────────────────────
         $mostViewed = Product::with('categories:id,name')
             ->orderByDesc('view_count')
-            ->limit(5)
+            ->limit(6)
             ->get()
             ->map(fn($product) => [
                 'id'         => $product->id,
