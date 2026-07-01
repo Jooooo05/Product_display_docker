@@ -84,39 +84,69 @@ const imageFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 const isDragging = ref(false);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB dalam bytes
 
-const triggerFileInput = () => fileInputRef.value?.click();
+const validateAndSetFile = (file : any) => {
+    if (!file) return;
 
-const onFileSelected = (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-        processFile(input.files[0]);
+    // Cek tipe file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Format File Tidak Didukung',
+            text: 'Silakan upload file dengan format JPG, PNG, atau WEBP.',
+            confirmButtonColor: '#d33',
+        });
+        return;
     }
-};
 
-const onDrop = (event: DragEvent) => {
-    isDragging.value = false;
-    const file = event.dataTransfer?.files[0];
-    if (file && file.type.startsWith("image/")) {
-        processFile(file);
+    // Cek ukuran file
+    if (file.size > MAX_FILE_SIZE) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Ukuran File Terlalu Besar',
+            text: `Ukuran file (${(file.size / 1024 / 1024).toFixed(2)} MB) melebihi batas maksimal 2MB.`,
+            confirmButtonColor: '#d33',
+        });
+        return;
     }
-};
 
-const processFile = (file: File) => {
+    // Revoke preview lama sebelum bikin yang baru
+    if (imagePreview.value) {
+        URL.revokeObjectURL(imagePreview.value);
+    }
+
     imageFile.value = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        imagePreview.value = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    imagePreview.value = URL.createObjectURL(file);
+};
+
+const onFileSelected = (event : Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0] ?? null;
+    validateAndSetFile(file);
+};
+
+const onDrop = (event : DragEvent) => {
+    isDragging.value = false;
+    const file = event.dataTransfer?.files?.[0] ?? null;
+    validateAndSetFile(file);
 };
 
 const removeImage = () => {
+    if (imagePreview.value) {
+        URL.revokeObjectURL(imagePreview.value);
+    }
     imageFile.value = null;
     imagePreview.value = null;
-    if (fileInputRef.value) fileInputRef.value.value = "";
+    if (fileInputRef.value) {
+        fileInputRef.value.value = ''; // reset input
+    }
 };
 
+const triggerFileInput = () => {
+    fileInputRef.value?.click();
+};
 
 
 // ============================================================
@@ -558,13 +588,14 @@ onMounted(async () => {
                                         max-height="170"
                                     />
                                     <v-btn
-                                        icon="mdi-close"
                                         size="x-small"
                                         color="error"
                                         variant="flat"
                                         class="remove-image-btn"
                                         @click="removeImage"
-                                    />
+                                    >
+                                        <SvgSprite name="custom-close" style="width: 16px; height: 16px; transform: rotate(45deg)" />
+                                    </v-btn>
                                 </div>
 
                                 <!-- Dropzone -->
