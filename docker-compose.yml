@@ -8,6 +8,7 @@ services:
       - .:/var/www/html          # live-mount semua kode dari laptop ke container
       - /var/www/html/vendor     # kecualikan folder vendor, biar tetap pakai hasil build
       - /var/www/html/node_modules     # kecualikan folder node_modules, biar tetap pakai hasil build
+      - /var/www/html/storage     # kecualikan folder storage, biar tetap pakai hasil build
     environment:
       - DB_HOST=db
       - DB_DATABASE=${DB_DATABASE:-laravel}
