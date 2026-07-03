@@ -47,7 +47,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
     bcmath
 
 # Copy Composer dari image resmi-nya (bukan install manual)
-COPY --m=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Copy source code project
 COPY . .
