@@ -1,45 +1,46 @@
 services:
-  # Service utama: menjalankan kode Laravel (PHP-FPM)
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/var/www/html          # live-mount semua kode dari laptop ke container
-      - /var/www/html/vendor     # kecualikan folder vendor, biar tetap pakai hasil build
-      - /var/www/html/node_modules     # kecualikan folder node_modules, biar tetap pakai hasil build
-      - /var/www/html/storage     # kecualikan folder storage, biar tetap pakai hasil build
-    environment:
-      - DB_HOST=db
-      - DB_DATABASE=${DB_DATABASE:-laravel}
-      - DB_USERNAME=${DB_USERNAME:-laravel}
-      - DB_PASSWORD=${DB_PASSWORD:-secret}
-    depends_on:
-      - db
+    # Service utama: menjalankan kode Laravel (PHP-FPM)
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - .:/var/www/html # live-mount semua kode dari laptop ke container
+            - /var/www/html/vendor # kecualikan folder vendor, biar tetap pakai hasil build
+            - /var/www/html/node_modules # kecualikan folder node_modules, biar tetap pakai hasil build
+            - /var/www/html/storage # kecualikan folder storage, biar tetap pakai hasil build
+            - /var/www/html/public/build # kecualikan folder public/build, biar tetap pakai hasil build
+        environment:
+            - DB_HOST=db
+            - DB_DATABASE=${DB_DATABASE:-laravel}
+            - DB_USERNAME=${DB_USERNAME:-laravel}
+            - DB_PASSWORD=${DB_PASSWORD:-secret}
+        depends_on:
+            - db
 
-  # Service web server, yang diakses dari browser
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-    volumes:
-      - .:/var/www/html
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - app
+    # Service web server, yang diakses dari browser
+    nginx:
+        image: nginx:alpine
+        ports:
+            - "8080:80"
+        volumes:
+            - .:/var/www/html
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - app
 
-  # Service database
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_DATABASE=${DB_DATABASE:-laravel}
-      - MYSQL_USER=${DB_USERNAME:-laravel}
-      - MYSQL_PASSWORD=${DB_PASSWORD:-secret}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootsecret}
-    volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+    # Service database
+    db:
+        image: mysql:8.0
+        environment:
+            - MYSQL_DATABASE=${DB_DATABASE:-laravel}
+            - MYSQL_USER=${DB_USERNAME:-laravel}
+            - MYSQL_PASSWORD=${DB_PASSWORD:-secret}
+            - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootsecret}
+        volumes:
+            - db-data:/var/lib/mysql
+        ports:
+            - "3306:3306"
 
 volumes:
-  db-data:
+    db-data:
