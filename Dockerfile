@@ -1,3 +1,25 @@
+# ==========================
+# Stage 1: Build Frontend
+# ==========================
+FROM node:20-alpine AS node
+
+WORKDIR /app
+
+# Copy dependency files
+COPY package.json package-lock.json ./
+
+# Install dependencies sesuai package-lock.json
+RUN npm ci --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Build assets (Vite)
+RUN npm run build
+
+# ==========================
+# Stage 2: PHP Application
+# ==========================
 FROM php:8.3-fpm-alpine
 
 WORKDIR /var/www/html
@@ -25,10 +47,13 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
     bcmath
 
 # Copy Composer dari image resmi-nya (bukan install manual)
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --m=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Copy source code project
 COPY . .
+
+# Copy hasil build frontend
+COPY --from=node /app/public/build ./public/build
 
 # Install dependency PHP (production, tanpa dev dependency)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
